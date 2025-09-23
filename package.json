@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@types/sqlite3": "^3.1.11",
+    "cli-table3": "^0.6.5",
     "express": "^5.1.0",
     "sqlite3": "^5.1.7"
   },
