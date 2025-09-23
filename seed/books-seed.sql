@@ -1,11 +1,11 @@
 -- Seed data for books table
 INSERT INTO books (ID, Author, Title) VALUES
-('550e8400-e29b-41d4-a716-446655440001', 'George Orwell', '1984'),
-('550e8400-e29b-41d4-a716-446655440002', 'Harper Lee', 'To Kill a Mockingbird'),
-('550e8400-e29b-41d4-a716-446655440003', 'F. Scott Fitzgerald', 'The Great Gatsby'),
-('550e8400-e29b-41d4-a716-446655440004', 'Jane Austen', 'Pride and Prejudice'),
-('550e8400-e29b-41d4-a716-446655440005', 'J.D. Salinger', 'The Catcher in the Rye'),
-('550e8400-e29b-41d4-a716-446655440006', 'Herman Melville', 'Moby Dick'),
+('1', 'George Orwell', '1984'),
+('2', 'Harper Lee', 'To Kill a Mockingbird'),
+('3', 'F. Scott Fitzgerald', 'The Great Gatsby'),
+('4', 'Jane Austen', 'Pride and Prejudice'),
+('5', 'J.D. Salinger', 'The Catcher in the Rye'),
+('6', 'Herman Melville', 'Moby Dick'),
 ('550e8400-e29b-41d4-a716-446655440007', 'Leo Tolstoy', 'War and Peace'),
 ('550e8400-e29b-41d4-a716-446655440008', 'Charlotte Bronte', 'Jane Eyre'),
 ('550e8400-e29b-41d4-a716-446655440009', 'Emily Bronte', 'Wuthering Heights'),
