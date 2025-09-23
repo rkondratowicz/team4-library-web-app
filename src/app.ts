@@ -3,7 +3,7 @@ import express from 'express';
 const app = express();
 const port: number = 3000;
 
-app.get('/', (req, res) => {
+app.get('/', (req: express.Request, res: express.Response) => {
     res.send('Hot reloading with tsx is working!');
 });
 
