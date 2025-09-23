@@ -1,9 +1,13 @@
-{ 
+{
   "name": "own-express",
   "version": "1.0.0",
-  "main": "app.js",
-  "devDependencies": {},
+  "type": "module",
+  "main": "dist/app.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "tsx watch src/app.ts",
+    "dev:node": "tsx src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,5 +16,11 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.0.0"
   }
 }
