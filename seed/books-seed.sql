@@ -1,0 +1,22 @@
+-- Seed data for books table
+INSERT INTO books (ID, Author, Title) VALUES
+('550e8400-e29b-41d4-a716-446655440001', 'George Orwell', '1984'),
+('550e8400-e29b-41d4-a716-446655440002', 'Harper Lee', 'To Kill a Mockingbird'),
+('550e8400-e29b-41d4-a716-446655440003', 'F. Scott Fitzgerald', 'The Great Gatsby'),
+('550e8400-e29b-41d4-a716-446655440004', 'Jane Austen', 'Pride and Prejudice'),
+('550e8400-e29b-41d4-a716-446655440005', 'J.D. Salinger', 'The Catcher in the Rye'),
+('550e8400-e29b-41d4-a716-446655440006', 'Herman Melville', 'Moby Dick'),
+('550e8400-e29b-41d4-a716-446655440007', 'Leo Tolstoy', 'War and Peace'),
+('550e8400-e29b-41d4-a716-446655440008', 'Charlotte Bronte', 'Jane Eyre'),
+('550e8400-e29b-41d4-a716-446655440009', 'Emily Bronte', 'Wuthering Heights'),
+('550e8400-e29b-41d4-a716-446655440010', 'Charles Dickens', 'Great Expectations'),
+('550e8400-e29b-41d4-a716-446655440011', 'Mark Twain', 'The Adventures of Huckleberry Finn'),
+('550e8400-e29b-41d4-a716-446655440012', 'William Shakespeare', 'Romeo and Juliet'),
+('550e8400-e29b-41d4-a716-446655440013', 'Aldous Huxley', 'Brave New World'),
+('550e8400-e29b-41d4-a716-446655440014', 'Ray Bradbury', 'Fahrenheit 451'),
+('550e8400-e29b-41d4-a716-446655440015', 'J.R.R. Tolkien', 'The Lord of the Rings'),
+('550e8400-e29b-41d4-a716-446655440016', 'Agatha Christie', 'Murder on the Orient Express'),
+('550e8400-e29b-41d4-a716-446655440017', 'Ernest Hemingway', 'The Old Man and the Sea'),
+('550e8400-e29b-41d4-a716-446655440018', 'Gabriel Garcia Marquez', 'One Hundred Years of Solitude'),
+('550e8400-e29b-41d4-a716-446655440019', 'Virginia Woolf', 'To the Lighthouse'),
+('550e8400-e29b-41d4-a716-446655440020', 'James Joyce', 'Ulysses');
