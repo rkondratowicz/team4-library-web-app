@@ -15,7 +15,7 @@ async function initializeApp() {
     try {
         await db.initialize();
         console.log('Database connected and initialized');
-        
+
         // Display books in console table format
         await displayBooksTable();
     } catch (error) {
@@ -27,7 +27,7 @@ async function initializeApp() {
 async function displayBooksTable() {
     try {
         const books = await db.getAllBooks();
-        
+
         if (books.length === 0) {
             console.log('\n📚 No books found in the database');
             return;
@@ -81,7 +81,7 @@ app.get('/', async (req: express.Request, res: express.Response) => {
 app.get('/table', async (req: express.Request, res: express.Response) => {
     try {
         const books = await db.getAllBooks();
-        
+
         let html = `
         <!DOCTYPE html>
         <html lang="en">
@@ -164,7 +164,7 @@ app.get('/table', async (req: express.Request, res: express.Response) => {
                     </thead>
                     <tbody>
         `;
-        
+
         books.forEach(book => {
             html += `
                         <tr>
@@ -174,7 +174,7 @@ app.get('/table', async (req: express.Request, res: express.Response) => {
                         </tr>
             `;
         });
-        
+
         html += `
                     </tbody>
                 </table>
@@ -182,7 +182,7 @@ app.get('/table', async (req: express.Request, res: express.Response) => {
         </body>
         </html>
         `;
-        
+
         res.send(html);
     } catch (error) {
         console.error('Error fetching books for table display:', error);
