@@ -224,6 +224,18 @@ export class MainController extends BaseController {
               tr:hover {
                   background-color: #f8f9fa;
               }
+              .edit-btn {
+                  background-color: #007bff;
+                  color: white;
+                  padding: 6px 12px;
+                  text-decoration: none;
+                  border-radius: 4px;
+                  font-size: 0.9em;
+                  transition: background-color 0.3s;
+              }
+              .edit-btn:hover {
+                  background-color: #0056b3;
+              }
               .book-count {
                   margin-bottom: 20px;
                   color: #666;
@@ -257,6 +269,7 @@ export class MainController extends BaseController {
                           <th>ID</th>
                           <th>Author</th>
                           <th>Title</th>
+                          <th>Actions</th>
                       </tr>
                   </thead>
                   <tbody>
@@ -268,6 +281,7 @@ export class MainController extends BaseController {
                           <td>${book.ID}</td>
                           <td>${book.Author}</td>
                           <td>${book.Title}</td>
+                          <td><a href="/edit/${book.ID}" class="edit-btn">Edit</a></td>
                       </tr>
         `;
       });
@@ -289,6 +303,351 @@ export class MainController extends BaseController {
                   <h1>Error</h1>
                   <p>Failed to fetch books from database</p>
                   <a href="/">← Back to Main Menu</a>
+              </body>
+          </html>
+      `);
+    }
+  };
+
+  /**
+   * Display edit form for a book
+   * GET /edit/:id
+   */
+  getEditBookForm = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const book = await this.bookService.getBookById(id);
+      
+      if (!book) {
+        res.status(404).send(`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Book Not Found - Library Management System</title>
+              <style>
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      margin: 0;
+                      padding: 20px;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      color: #333;
+                  }
+                  .container {
+                      max-width: 600px;
+                      margin: 0 auto;
+                      background-color: white;
+                      padding: 40px;
+                      border-radius: 16px;
+                      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                      text-align: center;
+                  }
+                  .back-link {
+                      display: inline-block;
+                      margin-top: 20px;
+                      color: #007bff;
+                      text-decoration: none;
+                      padding: 8px 16px;
+                      border: 1px solid #007bff;
+                      border-radius: 4px;
+                      transition: all 0.3s;
+                  }
+                  .back-link:hover {
+                      background-color: #007bff;
+                      color: white;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>❌ Book Not Found</h1>
+                  <p>The book with ID "${id}" could not be found.</p>
+                  <a href="/table" class="back-link">← Back to Books Table</a>
+              </div>
+          </body>
+          </html>
+        `);
+        return;
+      }
+
+      const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Edit Book - Library Management System</title>
+          <style>
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  color: #333;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 16px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+              }
+              h1 {
+                  color: #333;
+                  text-align: center;
+                  margin-bottom: 30px;
+              }
+              .form-group {
+                  margin-bottom: 20px;
+              }
+              label {
+                  display: block;
+                  margin-bottom: 8px;
+                  font-weight: bold;
+                  color: #555;
+              }
+              input[type="text"] {
+                  width: 100%;
+                  padding: 12px;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  font-size: 16px;
+                  box-sizing: border-box;
+              }
+              input[type="text"]:focus {
+                  outline: none;
+                  border-color: #007bff;
+                  box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+              }
+              .button-group {
+                  display: flex;
+                  gap: 10px;
+                  justify-content: center;
+                  margin-top: 30px;
+              }
+              .btn {
+                  padding: 12px 24px;
+                  border: none;
+                  border-radius: 4px;
+                  font-size: 16px;
+                  cursor: pointer;
+                  text-decoration: none;
+                  display: inline-block;
+                  text-align: center;
+                  transition: all 0.3s;
+              }
+              .btn-primary {
+                  background-color: #007bff;
+                  color: white;
+              }
+              .btn-primary:hover {
+                  background-color: #0056b3;
+              }
+              .btn-secondary {
+                  background-color: #6c757d;
+                  color: white;
+              }
+              .btn-secondary:hover {
+                  background-color: #545b62;
+              }
+              .book-id {
+                  background-color: #f8f9fa;
+                  padding: 8px 12px;
+                  border-radius: 4px;
+                  font-family: monospace;
+                  color: #6c757d;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>📝 Edit Book</h1>
+              
+              <form action="/edit/${book.ID}" method="POST">
+                  <div class="form-group">
+                      <label>Book ID:</label>
+                      <div class="book-id">${book.ID}</div>
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="author">Author:</label>
+                      <input type="text" id="author" name="Author" value="${book.Author}" required maxlength="255">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="title">Title:</label>
+                      <input type="text" id="title" name="Title" value="${book.Title}" required maxlength="500">
+                  </div>
+                  
+                  <div class="button-group">
+                      <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                      <a href="/table" class="btn btn-secondary">❌ Cancel</a>
+                  </div>
+              </form>
+          </div>
+      </body>
+      </html>
+      `;
+
+      res.send(html);
+    } catch (error) {
+      console.error('Error fetching book for edit form:', error);
+      res.status(500).send(`
+          <html>
+              <body>
+                  <h1>Error</h1>
+                  <p>Failed to load book for editing</p>
+                  <a href="/table">← Back to Books Table</a>
+              </body>
+          </html>
+      `);
+    }
+  };
+
+  /**
+   * Handle form submission for updating a book
+   * POST /edit/:id
+   */
+  updateBookFromForm = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { Author, Title } = req.body;
+      
+      const updated = await this.bookService.updateBook(id, { Author, Title });
+      
+      if (!updated) {
+        res.status(404).send(`
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Update Failed - Library Management System</title>
+              <style>
+                  body {
+                      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                      margin: 0;
+                      padding: 20px;
+                      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      min-height: 100vh;
+                      color: #333;
+                  }
+                  .container {
+                      max-width: 600px;
+                      margin: 0 auto;
+                      background-color: white;
+                      padding: 40px;
+                      border-radius: 16px;
+                      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                      text-align: center;
+                  }
+                  .back-link {
+                      display: inline-block;
+                      margin-top: 20px;
+                      color: #007bff;
+                      text-decoration: none;
+                      padding: 8px 16px;
+                      border: 1px solid #007bff;
+                      border-radius: 4px;
+                      transition: all 0.3s;
+                  }
+                  .back-link:hover {
+                      background-color: #007bff;
+                      color: white;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>❌ Update Failed</h1>
+                  <p>The book with ID "${id}" could not be found or updated.</p>
+                  <a href="/table" class="back-link">← Back to Books Table</a>
+              </div>
+          </body>
+          </html>
+        `);
+        return;
+      }
+
+      // Success - redirect to table with success message
+      res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Book Updated - Library Management System</title>
+          <style>
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  color: #333;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 16px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                  text-align: center;
+              }
+              .success-message {
+                  background-color: #d4edda;
+                  color: #155724;
+                  padding: 15px;
+                  border-radius: 4px;
+                  margin-bottom: 20px;
+                  border: 1px solid #c3e6cb;
+              }
+              .back-link {
+                  display: inline-block;
+                  margin-top: 20px;
+                  color: #007bff;
+                  text-decoration: none;
+                  padding: 8px 16px;
+                  border: 1px solid #007bff;
+                  border-radius: 4px;
+                  transition: all 0.3s;
+              }
+              .back-link:hover {
+                  background-color: #007bff;
+                  color: white;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>✅ Book Updated Successfully!</h1>
+              <div class="success-message">
+                  The book "${Title}" by ${Author} has been updated successfully.
+              </div>
+              <a href="/table" class="back-link">← Back to Books Table</a>
+          </div>
+          <script>
+              // Auto-redirect after 3 seconds
+              setTimeout(() => {
+                  window.location.href = '/table';
+              }, 3000);
+          </script>
+      </body>
+      </html>
+      `);
+    } catch (error) {
+      console.error('Error updating book from form:', error);
+      res.status(500).send(`
+          <html>
+              <body>
+                  <h1>Error</h1>
+                  <p>Failed to update book: ${error}</p>
+                  <a href="/table">← Back to Books Table</a>
               </body>
           </html>
       `);
