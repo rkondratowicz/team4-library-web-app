@@ -132,6 +132,12 @@ Desktop.ini
 logs
 *.log
 
+# Database files
+library.db
+*.db
+*.sqlite
+*.sqlite3
+
 # Temporary files
 tmp/
 temp/
