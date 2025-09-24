@@ -1,37 +1,120 @@
 # Library Web App 📚
 
-A modern TypeScript/Express.js web application for managing a library book database. This application provides both JSON API endpoints and a beautiful HTML table view for browsing books.
+A modern TypeScript/Express.js web application for managing a library book database, built with a clean **three-tier architecture**. This application provides both JSON API endpoints and a beautiful HTML table view for browsing books.
+
+## Architecture Overview
+
+This application follows a **three-tier architecture** pattern, ensuring clean separation of concerns and maintainable code:
+
+### 🏗️ Three-Tier Architecture
+
+1. **Presentation Layer** (`/controllers`, `/routes`)
+   - Handles HTTP requests and responses
+   - Input validation and formatting
+   - User interface logic (HTML rendering, JSON responses)
+
+2. **Business Logic Layer** (`/services`) 
+   - Core business rules and validation
+   - Data transformation and processing
+   - Coordination between controllers and repositories
+
+3. **Data Access Layer** (`/repositories`)
+   - Database operations and queries
+   - Data persistence abstraction
+   - Database connection management
 
 ## Features
 
-- **REST API**: JSON endpoints for programmatic access to book data
-- **Web Interface**: Beautiful HTML table view for browsing books
-- **SQLite Database**: Lightweight, file-based database for storing book information
-- **TypeScript**: Full type safety and modern JavaScript features
-- **Hot Reloading**: Development server with automatic reloading using `tsx`
-- **Console Display**: Pretty table output in the terminal using `cli-table3`
+- **🏛️ Clean Architecture**: Three-tier separation with dependency injection
+- **🔗 REST API**: Full CRUD operations for book management
+- **🌐 Web Interface**: Beautiful HTML table view for browsing books
+- **🗄️ SQLite Database**: Lightweight, file-based database for storing book information
+- **📝 TypeScript**: Full type safety and modern JavaScript features
+- **🔄 Hot Reloading**: Development server with automatic reloading using `tsx`
+- **📊 Console Display**: Pretty table output in the terminal using `cli-table3`
+- **🔌 Dependency Injection**: Clean dependency management with custom container
+- **⚠️ Error Handling**: Comprehensive error handling across all layers
 
 ## Project Structure
 
 ```
 ├── src/
-│   ├── app.ts          # Main Express application
-│   └── database.ts     # Database class and Book interface
+│   ├── app.ts                      # Application entry point & bootstrapping
+│   ├── index.ts                    # Main exports
+│   │
+│   ├── controllers/                # 🎯 PRESENTATION LAYER
+│   │   ├── BaseController.ts       # Base controller with common functionality
+│   │   ├── BookController.ts       # Book-related HTTP endpoints
+│   │   └── MainController.ts       # Main app routes (home, table view)
+│   │
+│   ├── services/                   # 🧠 BUSINESS LOGIC LAYER
+│   │   ├── BookService.ts          # Book business logic & validation
+│   │   └── DatabaseService.ts      # Database-related business logic
+│   │
+│   ├── repositories/               # 💾 DATA ACCESS LAYER
+│   │   ├── interfaces.ts           # Repository contracts/interfaces
+│   │   ├── SQLiteBookRepository.ts # SQLite book data operations
+│   │   ├── SQLiteDatabaseRepository.ts # Database management operations
+│   │   └── index.ts               # Repository exports
+│   │
+│   ├── models/                     # 📋 DATA MODELS
+│   │   └── Book.ts                # Book entity and related interfaces
+│   │
+│   ├── routes/                     # 🛤️ ROUTE CONFIGURATION
+│   │   ├── bookRoutes.ts          # Book API route definitions
+│   │   ├── mainRoutes.ts          # Main application route definitions
+│   │   └── index.ts               # Route exports
+│   │
+│   ├── container/                  # 🔗 DEPENDENCY INJECTION
+│   │   └── Container.ts           # DI container for dependency management
+│   │
+│   ├── utils/                      # 🛠️ UTILITIES
+│   │   └── ConsoleUtils.ts        # Console output formatting utilities
+│   │
+│   └── database.ts                 # Legacy database class (deprecated)
+│
 ├── migrations/
 │   └── 01-added-books-table.sql    # Database schema
 ├── seed/
-│   └── books-seed.sql  # Sample book data
-├── library.db          # SQLite database file
-└── package.json        # Project dependencies and scripts
+│   └── books-seed.sql              # Sample book data
+├── library.db                      # SQLite database file
+└── package.json                    # Project dependencies and scripts
 ```
 
 ## API Endpoints
 
-### Books
-- `GET /` - Get all books in JSON format
+### Main Application Routes
+- `GET /` - Main menu page with navigation
 - `GET /table` - View all books in HTML table format
-- `GET /api/books/:id` - Get a specific book by ID
 - `GET /api/database/info` - Get database information and statistics
+
+### Books API (`/api/books`)
+- `GET /api/books` - Get all books in JSON format
+- `GET /api/books/:id` - Get a specific book by ID
+- `POST /api/books` - Create a new book
+- `PUT /api/books/:id` - Update an existing book
+- `DELETE /api/books/:id` - Delete a book
+
+### Request/Response Examples
+
+#### Create a Book
+```bash
+curl -X POST http://localhost:3000/api/books \
+  -H "Content-Type: application/json" \
+  -d '{"Author": "Jane Doe", "Title": "My New Book"}'
+```
+
+#### Update a Book
+```bash
+curl -X PUT http://localhost:3000/api/books/1 \
+  -H "Content-Type: application/json" \
+  -d '{"Title": "Updated Book Title"}'
+```
+
+#### Delete a Book
+```bash
+curl -X DELETE http://localhost:3000/api/books/1
+```
 
 ## Getting Started
 
@@ -83,14 +166,43 @@ The application will be available at:
 - **JSON API**: http://localhost:3000
 - **HTML Table View**: http://localhost:3000/table
 
+## Architecture Benefits
+
+### 🎯 Separation of Concerns
+Each layer has a single responsibility:
+- **Controllers**: Handle HTTP requests/responses only
+- **Services**: Contain business logic and validation
+- **Repositories**: Manage data access and persistence
+
+### 🔧 Maintainability
+- Easy to modify individual layers without affecting others
+- Clear dependencies and data flow
+- Consistent error handling patterns
+
+### 🧪 Testability
+- Each layer can be unit tested independently
+- Dependencies are injected, making mocking easy
+- Business logic is isolated from I/O operations
+
+### 🔄 Extensibility
+- Easy to add new features by extending existing patterns
+- Simple to swap out implementations (e.g., different databases)
+- Support for multiple data sources or external APIs
+
 ## Development
 
-The application uses:
+### Technology Stack
 - **Express.js** - Web framework
 - **SQLite3** - Database
-- **TypeScript** - Type safety
+- **TypeScript** - Type safety and modern JavaScript features
 - **tsx** - TypeScript execution and hot reloading
 - **cli-table3** - Pretty console table output
+
+### Development Principles
+- **Dependency Injection**: Clean separation and testability
+- **Interface Segregation**: Repository interfaces for abstraction
+- **Single Responsibility**: Each class has one clear purpose
+- **Error Handling**: Comprehensive error management across layers
 
 ### Database Schema
 
