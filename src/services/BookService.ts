@@ -64,6 +64,12 @@ export class BookService {
       Title: bookData.Title.trim()
     };
 
+    // Add optional fields
+    if (bookData.ISBN) book.ISBN = bookData.ISBN.trim();
+    if (bookData.Genre) book.Genre = bookData.Genre.trim();
+    if (bookData.PublicationYear) book.PublicationYear = bookData.PublicationYear;
+    if (bookData.Description) book.Description = bookData.Description.trim();
+
     // Check if book with same ID already exists
     const existingBook = await this.bookRepository.findById(book.ID);
     if (existingBook) {
@@ -92,13 +98,25 @@ export class BookService {
     // Validate update data
     this.validateUpdateData(updateData);
 
-    // Trim string fields
+    // Trim string fields and prepare cleaned data
     const cleanedData: UpdateBookInput = {};
     if (updateData.Author !== undefined) {
       cleanedData.Author = updateData.Author.trim();
     }
     if (updateData.Title !== undefined) {
       cleanedData.Title = updateData.Title.trim();
+    }
+    if (updateData.ISBN !== undefined) {
+      cleanedData.ISBN = updateData.ISBN.trim();
+    }
+    if (updateData.Genre !== undefined) {
+      cleanedData.Genre = updateData.Genre.trim();
+    }
+    if (updateData.PublicationYear !== undefined) {
+      cleanedData.PublicationYear = updateData.PublicationYear;
+    }
+    if (updateData.Description !== undefined) {
+      cleanedData.Description = updateData.Description.trim();
     }
 
     try {
@@ -139,8 +157,8 @@ export class BookService {
   }
 
   /**
-   * Search books by author or title
-   * @param searchTerm Search term to match against author or title
+   * Search books by author, title, genre, or ISBN
+   * @param searchTerm Search term to match against author, title, genre, or ISBN
    * @returns Promise<Book[]> Array of matching books
    */
   async searchBooks(searchTerm: string): Promise<Book[]> {
@@ -151,11 +169,14 @@ export class BookService {
     try {
       const allBooks = await this.bookRepository.findAll();
       const searchLower = searchTerm.toLowerCase().trim();
-      
+
       return allBooks
-        .filter((book: any) => 
-          book.Author.toLowerCase().includes(searchLower) || 
-          book.Title.toLowerCase().includes(searchLower)
+        .filter((book: any) =>
+          book.Author.toLowerCase().includes(searchLower) ||
+          book.Title.toLowerCase().includes(searchLower) ||
+          (book.Genre && book.Genre.toLowerCase().includes(searchLower)) ||
+          (book.ISBN && book.ISBN.toLowerCase().includes(searchLower)) ||
+          (book.Description && book.Description.toLowerCase().includes(searchLower))
         )
         .map(this.transformBookData);
     } catch (error) {
@@ -185,6 +206,20 @@ export class BookService {
     }
     if (bookData.Title.length > 500) {
       throw new Error('Title cannot exceed 500 characters');
+    }
+
+    // Validate optional fields
+    if (bookData.ISBN && (typeof bookData.ISBN !== 'string' || bookData.ISBN.length > 20)) {
+      throw new Error('ISBN must be a string with maximum 20 characters');
+    }
+    if (bookData.Genre && (typeof bookData.Genre !== 'string' || bookData.Genre.length > 100)) {
+      throw new Error('Genre must be a string with maximum 100 characters');
+    }
+    if (bookData.PublicationYear && (typeof bookData.PublicationYear !== 'number' || bookData.PublicationYear < 1000 || bookData.PublicationYear > 2030)) {
+      throw new Error('Publication year must be a number between 1000 and 2030');
+    }
+    if (bookData.Description && (typeof bookData.Description !== 'string' || bookData.Description.length > 1000)) {
+      throw new Error('Description must be a string with maximum 1000 characters');
     }
   }
 
@@ -220,6 +255,30 @@ export class BookService {
         throw new Error('Title cannot exceed 500 characters');
       }
     }
+
+    if (updateData.ISBN !== undefined) {
+      if (typeof updateData.ISBN !== 'string' || updateData.ISBN.length > 20) {
+        throw new Error('ISBN must be a string with maximum 20 characters');
+      }
+    }
+
+    if (updateData.Genre !== undefined) {
+      if (typeof updateData.Genre !== 'string' || updateData.Genre.length > 100) {
+        throw new Error('Genre must be a string with maximum 100 characters');
+      }
+    }
+
+    if (updateData.PublicationYear !== undefined) {
+      if (typeof updateData.PublicationYear !== 'number' || updateData.PublicationYear < 1000 || updateData.PublicationYear > 2030) {
+        throw new Error('Publication year must be a number between 1000 and 2030');
+      }
+    }
+
+    if (updateData.Description !== undefined) {
+      if (typeof updateData.Description !== 'string' || updateData.Description.length > 1000) {
+        throw new Error('Description must be a string with maximum 1000 characters');
+      }
+    }
   }
 
   /**
@@ -230,7 +289,11 @@ export class BookService {
     return {
       ID: book.ID,
       Author: book.Author,
-      Title: book.Title
+      Title: book.Title,
+      ISBN: book.ISBN,
+      Genre: book.Genre,
+      PublicationYear: book.PublicationYear,
+      Description: book.Description
     };
   }
 

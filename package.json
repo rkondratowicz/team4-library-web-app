@@ -8,6 +8,7 @@
     "start": "node dist/app.js",
     "dev": "tsx watch src/app.ts",
     "dev:node": "tsx src/app.ts",
+    "migrate": "tsx scripts/migrate.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",

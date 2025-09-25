@@ -6,24 +6,24 @@ import { BaseController } from './BaseController.js';
  * This is part of the Presentation Layer in our three-tier architecture
  */
 export class MainController extends BaseController {
-  private bookService: any; // Will be injected
-  private databaseService: any; // Will be injected
+    private bookService: any; // Will be injected
+    private databaseService: any; // Will be injected
 
-  constructor(bookService: any, databaseService: any) {
-    super();
-    this.bookService = bookService;
-    this.databaseService = databaseService;
-  }
+    constructor(bookService: any, databaseService: any) {
+        super();
+        this.bookService = bookService;
+        this.databaseService = databaseService;
+    }
 
-  /**
-   * Render the main menu page
-   * GET /
-   */
-  getMainMenu = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const bookCount = await this.bookService.getBookCount();
-      
-      const html = `
+    /**
+     * Render the main menu page
+     * GET /
+     */
+    getMainMenu = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const bookCount = await this.bookService.getBookCount();
+
+            const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -155,11 +155,11 @@ export class MainController extends BaseController {
       </body>
       </html>
       `;
-      
-      res.send(html);
-    } catch (error) {
-      console.error('Error loading main menu:', error);
-      res.status(500).send(`
+
+            res.send(html);
+        } catch (error) {
+            console.error('Error loading main menu:', error);
+            res.status(500).send(`
           <html>
               <body style="font-family: Arial, sans-serif; padding: 20px;">
                   <h1>Error</h1>
@@ -168,18 +168,18 @@ export class MainController extends BaseController {
               </body>
           </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Display all books as an HTML table
-   * GET /table
-   */
-  getBooksTable = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const books = await this.bookService.getAllBooks();
+    /**
+     * Display all books as an HTML table
+     * GET /table
+     */
+    getBooksTable = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const books = await this.bookService.getAllBooks();
 
-      let html = `
+            let html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -285,24 +285,32 @@ export class MainController extends BaseController {
                           <th>ID</th>
                           <th>Author</th>
                           <th>Title</th>
+                          <th>ISBN</th>
+                          <th>Genre</th>
+                          <th>Publication Year</th>
+                          <th>Description</th>
                           <th>Actions</th>
                       </tr>
                   </thead>
                   <tbody>
       `;
 
-      books.forEach((book: any) => {
-        html += `
+            books.forEach((book: any) => {
+                html += `
                       <tr>
                           <td>${book.ID}</td>
                           <td>${book.Author}</td>
                           <td>${book.Title}</td>
+                          <td>${book.ISBN || ''}</td>
+                          <td>${book.Genre || ''}</td>
+                          <td>${book.PublicationYear || ''}</td>
+                          <td title="${book.Description || ''}">${book.Description ? (book.Description.length > 50 ? book.Description.substring(0, 50) + '...' : book.Description) : ''}</td>
                           <td><a href="/edit/${book.ID}" class="edit-btn">Edit</a></td>
                       </tr>
         `;
-      });
+            });
 
-      html += `
+            html += `
                   </tbody>
               </table>
           </div>
@@ -310,10 +318,10 @@ export class MainController extends BaseController {
       </html>
       `;
 
-      res.send(html);
-    } catch (error) {
-      console.error('Error fetching books for table display:', error);
-      res.status(500).send(`
+            res.send(html);
+        } catch (error) {
+            console.error('Error fetching books for table display:', error);
+            res.status(500).send(`
           <html>
               <body>
                   <h1>Error</h1>
@@ -322,20 +330,20 @@ export class MainController extends BaseController {
               </body>
           </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Display edit form for a book
-   * GET /edit/:id
-   */
-  getEditBookForm = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const book = await this.bookService.getBookById(id);
-      
-      if (!book) {
-        res.status(404).send(`
+    /**
+     * Display edit form for a book
+     * GET /edit/:id
+     */
+    getEditBookForm = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const book = await this.bookService.getBookById(id);
+
+            if (!book) {
+                res.status(404).send(`
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -385,10 +393,10 @@ export class MainController extends BaseController {
           </body>
           </html>
         `);
-        return;
-      }
+                return;
+            }
 
-      const html = `
+            const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -426,18 +434,23 @@ export class MainController extends BaseController {
                   font-weight: bold;
                   color: #555;
               }
-              input[type="text"] {
+              input[type="text"], input[type="number"], textarea {
                   width: 100%;
                   padding: 12px;
                   border: 1px solid #ddd;
                   border-radius: 4px;
                   font-size: 16px;
                   box-sizing: border-box;
+                  font-family: inherit;
               }
-              input[type="text"]:focus {
+              input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
                   outline: none;
                   border-color: #007bff;
                   box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+              }
+              textarea {
+                  resize: vertical;
+                  min-height: 100px;
               }
               .button-group {
                   display: flex;
@@ -499,6 +512,26 @@ export class MainController extends BaseController {
                       <input type="text" id="title" name="Title" value="${book.Title}" required maxlength="500">
                   </div>
                   
+                  <div class="form-group">
+                      <label for="isbn">ISBN:</label>
+                      <input type="text" id="isbn" name="ISBN" value="${book.ISBN || ''}" maxlength="20" placeholder="e.g., 978-0-452-28423-4">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="genre">Genre:</label>
+                      <input type="text" id="genre" name="Genre" value="${book.Genre || ''}" maxlength="100" placeholder="e.g., Fiction, Mystery, Romance">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="publicationYear">Publication Year:</label>
+                      <input type="number" id="publicationYear" name="PublicationYear" value="${book.PublicationYear || ''}" min="1000" max="2030" placeholder="e.g., 1949">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="description">Description:</label>
+                      <textarea id="description" name="Description" maxlength="1000" rows="4" placeholder="Enter book description...">${book.Description || ''}</textarea>
+                  </div>
+                  
                   <div class="button-group">
                       <button type="submit" class="btn btn-primary">💾 Save Changes</button>
                       <a href="/table" class="btn btn-secondary">❌ Cancel</a>
@@ -509,10 +542,10 @@ export class MainController extends BaseController {
       </html>
       `;
 
-      res.send(html);
-    } catch (error) {
-      console.error('Error fetching book for edit form:', error);
-      res.status(500).send(`
+            res.send(html);
+        } catch (error) {
+            console.error('Error fetching book for edit form:', error);
+            res.status(500).send(`
           <html>
               <body>
                   <h1>Error</h1>
@@ -521,22 +554,28 @@ export class MainController extends BaseController {
               </body>
           </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Handle form submission for updating a book
-   * POST /edit/:id
-   */
-  updateBookFromForm = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { Author, Title } = req.body;
-      
-      const updated = await this.bookService.updateBook(id, { Author, Title });
-      
-      if (!updated) {
-        res.status(404).send(`
+    /**
+     * Handle form submission for updating a book
+     * POST /edit/:id
+     */
+    updateBookFromForm = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { Author, Title, ISBN, Genre, PublicationYear, Description } = req.body;
+
+            const bookData: any = { Author, Title };
+            if (ISBN) bookData.ISBN = ISBN;
+            if (Genre) bookData.Genre = Genre;
+            if (PublicationYear) bookData.PublicationYear = parseInt(PublicationYear) || null;
+            if (Description) bookData.Description = Description;
+
+            const updated = await this.bookService.updateBook(id, bookData);
+
+            if (!updated) {
+                res.status(404).send(`
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -586,11 +625,11 @@ export class MainController extends BaseController {
           </body>
           </html>
         `);
-        return;
-      }
+                return;
+            }
 
-      // Success - redirect to table with success message
-      res.send(`
+            // Success - redirect to table with success message
+            res.send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -656,9 +695,9 @@ export class MainController extends BaseController {
       </body>
       </html>
       `);
-    } catch (error) {
-      console.error('Error updating book from form:', error);
-      res.status(500).send(`
+        } catch (error) {
+            console.error('Error updating book from form:', error);
+            res.status(500).send(`
           <html>
               <body>
                   <h1>Error</h1>
@@ -667,16 +706,16 @@ export class MainController extends BaseController {
               </body>
           </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Display form for adding a new book
-   * GET /add-book
-   */
-  getAddBookForm = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const html = `
+    /**
+     * Display form for adding a new book
+     * GET /add-book
+     */
+    getAddBookForm = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const html = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -714,18 +753,23 @@ export class MainController extends BaseController {
                   font-weight: bold;
                   color: #555;
               }
-              input[type="text"] {
+              input[type="text"], input[type="number"], textarea {
                   width: 100%;
                   padding: 12px;
                   border: 1px solid #ddd;
                   border-radius: 4px;
                   font-size: 16px;
                   box-sizing: border-box;
+                  font-family: inherit;
               }
-              input[type="text"]:focus {
+              input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
                   outline: none;
                   border-color: #007bff;
                   box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+              }
+              textarea {
+                  resize: vertical;
+                  min-height: 100px;
               }
               .button-group {
                   display: flex;
@@ -794,6 +838,26 @@ export class MainController extends BaseController {
                       <input type="text" id="title" name="Title" placeholder="Enter book title" required maxlength="500">
                   </div>
                   
+                  <div class="form-group">
+                      <label for="isbn">ISBN:</label>
+                      <input type="text" id="isbn" name="ISBN" placeholder="e.g., 978-0-452-28423-4" maxlength="20">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="genre">Genre:</label>
+                      <input type="text" id="genre" name="Genre" placeholder="e.g., Fiction, Mystery, Romance" maxlength="100">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="publicationYear">Publication Year:</label>
+                      <input type="number" id="publicationYear" name="PublicationYear" placeholder="e.g., 1949" min="1000" max="2030">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="description">Description:</label>
+                      <textarea id="description" name="Description" placeholder="Enter book description..." maxlength="1000" rows="4"></textarea>
+                  </div>
+                  
                   <div class="button-group">
                       <button type="submit" class="btn btn-primary">💾 Add Book</button>
                       <a href="/table" class="btn btn-secondary">❌ Cancel</a>
@@ -804,10 +868,10 @@ export class MainController extends BaseController {
       </html>
       `;
 
-      res.send(html);
-    } catch (error) {
-      console.error('Error displaying add book form:', error);
-      res.status(500).send(`
+            res.send(html);
+        } catch (error) {
+            console.error('Error displaying add book form:', error);
+            res.status(500).send(`
           <html>
               <body>
                   <h1>Error</h1>
@@ -816,27 +880,31 @@ export class MainController extends BaseController {
               </body>
           </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Handle form submission for creating a new book
-   * POST /add-book
-   */
-  createBookFromForm = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { ID, Author, Title } = req.body;
-      
-      // Create book data object
-      const bookData: any = { Author, Title };
-      if (ID && ID.trim()) {
-        bookData.ID = ID.trim();
-      }
-      
-      const newBook = await this.bookService.createBook(bookData);
-      
-      // Success - redirect to table with success message
-      res.send(`
+    /**
+     * Handle form submission for creating a new book
+     * POST /add-book
+     */
+    createBookFromForm = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { ID, Author, Title, ISBN, Genre, PublicationYear, Description } = req.body;
+
+            // Create book data object
+            const bookData: any = { Author, Title };
+            if (ID && ID.trim()) {
+                bookData.ID = ID.trim();
+            }
+            if (ISBN) bookData.ISBN = ISBN;
+            if (Genre) bookData.Genre = Genre;
+            if (PublicationYear) bookData.PublicationYear = parseInt(PublicationYear) || null;
+            if (Description) bookData.Description = Description;
+
+            const newBook = await this.bookService.createBook(bookData);
+
+            // Success - redirect to table with success message
+            res.send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -932,16 +1000,16 @@ export class MainController extends BaseController {
       </body>
       </html>
       `);
-    } catch (error) {
-      console.error('Error creating book from form:', error);
-      
-      // Extract error message for better user experience
-      let errorMessage = 'An unexpected error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      res.status(400).send(`
+        } catch (error) {
+            console.error('Error creating book from form:', error);
+
+            // Extract error message for better user experience
+            let errorMessage = 'An unexpected error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            res.status(400).send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -1016,19 +1084,19 @@ export class MainController extends BaseController {
       </body>
       </html>
       `);
-    }
-  };
+        }
+    };
 
-  /**
-   * Get database information
-   * GET /api/database/info
-   */
-  getDatabaseInfo = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const dbInfo = await this.databaseService.getDatabaseInfo();
-      this.success(res, dbInfo);
-    } catch (error) {
-      this.error(res, error);
-    }
-  };
+    /**
+     * Get database information
+     * GET /api/database/info
+     */
+    getDatabaseInfo = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const dbInfo = await this.databaseService.getDatabaseInfo();
+            this.success(res, dbInfo);
+        } catch (error) {
+            this.error(res, error);
+        }
+    };
 }

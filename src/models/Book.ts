@@ -6,6 +6,10 @@ export interface Book {
   ID: string;
   Author: string;
   Title: string;
+  ISBN?: string;
+  Genre?: string;
+  PublicationYear?: number;
+  Description?: string;
 }
 
 /**
@@ -16,6 +20,10 @@ export interface CreateBookInput {
   ID?: string; // Optional, can be auto-generated
   Author: string;
   Title: string;
+  ISBN?: string;
+  Genre?: string;
+  PublicationYear?: number;
+  Description?: string;
 }
 
 /**
@@ -25,6 +33,10 @@ export interface CreateBookInput {
 export interface UpdateBookInput {
   Author?: string;
   Title?: string;
+  ISBN?: string;
+  Genre?: string;
+  PublicationYear?: number;
+  Description?: string;
 }
 
 /**
