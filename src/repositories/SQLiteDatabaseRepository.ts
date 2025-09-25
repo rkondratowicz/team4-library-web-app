@@ -1,11 +1,11 @@
+import { promisify } from 'node:util';
 import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
-import { IDatabaseRepository } from './interfaces.js';
+import type { IDatabaseRepository } from './interfaces.js';
 
 /**
  * SQLite implementation of the Database Repository
  * This is part of the Data Access Layer in our three-tier architecture
- * 
+ *
  * Responsibilities:
  * - Database initialization
  * - Database connection management
@@ -48,16 +48,20 @@ export class SQLiteDatabaseRepository implements IDatabaseRepository {
    */
   async getInfo(): Promise<{ bookCount: number; databasePath: string }> {
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT COUNT(*) as bookCount FROM books', [], (err, row: any) => {
-        if (err) {
-          reject(new Error(`Database query failed: ${err.message}`));
-        } else {
-          resolve({
-            bookCount: row.bookCount,
-            databasePath: this.dbPath
-          });
+      this.db.get(
+        'SELECT COUNT(*) as bookCount FROM books',
+        [],
+        (err, row: any) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve({
+              bookCount: row.bookCount,
+              databasePath: this.dbPath,
+            });
+          }
         }
-      });
+      );
     });
   }
 

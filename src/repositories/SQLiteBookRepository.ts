@@ -1,12 +1,11 @@
-import sqlite3 from 'sqlite3';
-import { promisify } from 'util';
-import { Book, UpdateBookInput } from '../models/Book.js';
-import { IBookRepository } from './interfaces.js';
+import type sqlite3 from 'sqlite3';
+import type { Book, UpdateBookInput } from '../models/Book.js';
+import type { IBookRepository } from './interfaces.js';
 
 /**
  * SQLite implementation of the Book Repository
  * This is part of the Data Access Layer in our three-tier architecture
- * 
+ *
  * Responsibilities:
  * - Direct database operations
  * - SQL query execution
@@ -26,13 +25,17 @@ export class SQLiteBookRepository implements IBookRepository {
    */
   async findAll(): Promise<Book[]> {
     return new Promise((resolve, reject) => {
-      this.db.all('SELECT * FROM books ORDER BY Author, Title', [], (err, rows) => {
-        if (err) {
-          reject(new Error(`Database query failed: ${err.message}`));
-        } else {
-          resolve(rows as Book[]);
+      this.db.all(
+        'SELECT * FROM books ORDER BY Author, Title',
+        [],
+        (err, rows) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(rows as Book[]);
+          }
         }
-      });
+      );
     });
   }
 
@@ -63,7 +66,7 @@ export class SQLiteBookRepository implements IBookRepository {
       this.db.run(
         'INSERT INTO books (ID, Author, Title) VALUES (?, ?, ?)',
         [book.ID, book.Author, book.Title],
-        function (err) {
+        (err) => {
           if (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
               reject(new Error(`Book with ID '${book.ID}' already exists`));

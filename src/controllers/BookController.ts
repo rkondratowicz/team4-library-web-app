@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { BaseController } from './BaseController.js';
 
 /**
@@ -17,7 +17,7 @@ export class BookController extends BaseController {
    * Get all books in JSON format
    * GET /api/books
    */
-  getAllBooks = async (req: Request, res: Response): Promise<void> => {
+  getAllBooks = async (_req: Request, res: Response): Promise<void> => {
     try {
       const books = await this.bookService.getAllBooks();
       this.success(res, books, `Found ${books.length} books`);
@@ -34,7 +34,7 @@ export class BookController extends BaseController {
     try {
       const { id } = req.params;
       const book = await this.bookService.getBookById(id);
-      
+
       if (!book) {
         this.notFound(res, `Book with ID '${id}' not found`);
         return;
@@ -69,7 +69,7 @@ export class BookController extends BaseController {
       const { id } = req.params;
       const updateData = req.body;
       const updated = await this.bookService.updateBook(id, updateData);
-      
+
       if (!updated) {
         this.notFound(res, `Book with ID '${id}' not found`);
         return;
@@ -89,7 +89,7 @@ export class BookController extends BaseController {
     try {
       const { id } = req.params;
       const deleted = await this.bookService.deleteBook(id);
-      
+
       if (!deleted) {
         this.notFound(res, `Book with ID '${id}' not found`);
         return;

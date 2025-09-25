@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Response } from 'express';
 
 /**
  * Base controller class with common functionality for all controllers
@@ -11,7 +11,7 @@ export abstract class BaseController {
     res.json({
       success: true,
       data,
-      message
+      message,
     });
   }
 
@@ -22,17 +22,20 @@ export abstract class BaseController {
     console.error('Controller Error:', error);
     res.status(statusCode).json({
       success: false,
-      error: error.message || 'Internal server error'
+      error: error.message || 'Internal server error',
     });
   }
 
   /**
    * Handle not found responses
    */
-  protected notFound(res: Response, message: string = 'Resource not found'): void {
+  protected notFound(
+    res: Response,
+    message: string = 'Resource not found'
+  ): void {
     res.status(404).json({
       success: false,
-      error: message
+      error: message,
     });
   }
 }

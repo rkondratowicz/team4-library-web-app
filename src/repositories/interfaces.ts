@@ -1,4 +1,4 @@
-import { Book, UpdateBookInput, DatabaseInfo } from '../models/Book.js';
+import type { Book, UpdateBookInput } from '../models/Book.js';
 
 /**
  * Interface for Book Repository

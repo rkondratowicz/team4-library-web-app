@@ -1,6 +1,5 @@
-import { Router } from 'express';
-import { MainController } from '../controllers/MainController.js';
-import express from 'express';
+import express, { Router } from 'express';
+import type { MainController } from '../controllers/MainController.js';
 
 /**
  * Main application routes configuration

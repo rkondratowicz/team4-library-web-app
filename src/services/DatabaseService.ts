@@ -1,4 +1,4 @@
-import { DatabaseInfo } from '../models/Book.js';
+import type { DatabaseInfo } from '../models/Book.js';
 
 /**
  * DatabaseService handles database-related business logic
@@ -18,12 +18,12 @@ export class DatabaseService {
   async getDatabaseInfo(): Promise<DatabaseInfo> {
     try {
       const rawInfo = await this.databaseRepository.getInfo();
-      
+
       // Transform and enhance the database information
       return {
         totalBooks: rawInfo.bookCount || 0,
         databasePath: rawInfo.databasePath || './library.db',
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
     } catch (error) {
       throw new Error(`Failed to retrieve database information: ${error}`);

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { BaseController } from './BaseController.js';
 
 /**
@@ -19,10 +19,10 @@ export class MainController extends BaseController {
    * Render the main menu page
    * GET /
    */
-  getMainMenu = async (req: Request, res: Response): Promise<void> => {
+  getMainMenu = async (_req: Request, res: Response): Promise<void> => {
     try {
       const bookCount = await this.bookService.getBookCount();
-      
+
       const html = `
       <!DOCTYPE html>
       <html lang="en">
@@ -155,7 +155,7 @@ export class MainController extends BaseController {
       </body>
       </html>
       `;
-      
+
       res.send(html);
     } catch (error) {
       console.error('Error loading main menu:', error);
@@ -175,7 +175,7 @@ export class MainController extends BaseController {
    * Display all books as an HTML table
    * GET /table
    */
-  getBooksTable = async (req: Request, res: Response): Promise<void> => {
+  getBooksTable = async (_req: Request, res: Response): Promise<void> => {
     try {
       const books = await this.bookService.getAllBooks();
 
@@ -317,7 +317,7 @@ export class MainController extends BaseController {
     try {
       const { id } = req.params;
       const book = await this.bookService.getBookById(id);
-      
+
       if (!book) {
         res.status(404).send(`
           <!DOCTYPE html>
@@ -516,9 +516,9 @@ export class MainController extends BaseController {
     try {
       const { id } = req.params;
       const { Author, Title } = req.body;
-      
+
       const updated = await this.bookService.updateBook(id, { Author, Title });
-      
+
       if (!updated) {
         res.status(404).send(`
           <!DOCTYPE html>
@@ -658,7 +658,7 @@ export class MainController extends BaseController {
    * Get database information
    * GET /api/database/info
    */
-  getDatabaseInfo = async (req: Request, res: Response): Promise<void> => {
+  getDatabaseInfo = async (_req: Request, res: Response): Promise<void> => {
     try {
       const dbInfo = await this.databaseService.getDatabaseInfo();
       this.success(res, dbInfo);

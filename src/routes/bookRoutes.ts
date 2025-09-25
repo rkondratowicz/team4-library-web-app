@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { BookController } from '../controllers/BookController.js';
+import type { BookController } from '../controllers/BookController.js';
 
 /**
  * Book routes configuration

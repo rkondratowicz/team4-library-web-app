@@ -1,9 +1,9 @@
-import { Book, CreateBookInput, UpdateBookInput } from '../models/Book.js';
+import type { Book, CreateBookInput, UpdateBookInput } from '../models/Book.js';
 
 /**
  * BookService handles all business logic related to books
  * This is part of the Business Logic Layer in our three-tier architecture
- * 
+ *
  * Responsibilities:
  * - Validation of business rules
  * - Data transformation
@@ -61,7 +61,7 @@ export class BookService {
     const book: Book = {
       ID: bookData.ID || this.generateBookId(),
       Author: bookData.Author.trim(),
-      Title: bookData.Title.trim()
+      Title: bookData.Title.trim(),
     };
 
     // Check if book with same ID already exists
@@ -151,11 +151,12 @@ export class BookService {
     try {
       const allBooks = await this.bookRepository.findAll();
       const searchLower = searchTerm.toLowerCase().trim();
-      
+
       return allBooks
-        .filter((book: any) => 
-          book.Author.toLowerCase().includes(searchLower) || 
-          book.Title.toLowerCase().includes(searchLower)
+        .filter(
+          (book: any) =>
+            book.Author.toLowerCase().includes(searchLower) ||
+            book.Title.toLowerCase().includes(searchLower)
         )
         .map(this.transformBookData);
     } catch (error) {
@@ -230,7 +231,7 @@ export class BookService {
     return {
       ID: book.ID,
       Author: book.Author,
-      Title: book.Title
+      Title: book.Title,
     };
   }
 
@@ -240,6 +241,6 @@ export class BookService {
    */
   private generateBookId(): string {
     // Simple UUID-like ID generator
-    return 'book-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    return `book-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
