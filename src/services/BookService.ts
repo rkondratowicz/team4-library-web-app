@@ -1,4 +1,4 @@
-import { Book, CreateBookInput, UpdateBookInput } from '../models/Book.js';
+import { Book, CreateBookInput, UpdateBookInput, SearchOptions, SearchResult } from '../models/Book.js';
 
 /**
  * BookService handles all business logic related to books
@@ -157,30 +157,106 @@ export class BookService {
   }
 
   /**
-   * Search books by author, title, genre, or ISBN
-   * @param searchTerm Search term to match against author, title, genre, or ISBN
+   * Search books with advanced options
+   * @param options Search options including search term, sort criteria, and filters
+   * @returns Promise<SearchResult> Search results with books and metadata
+   */
+  async searchBooks(options: SearchOptions): Promise<SearchResult> {
+    // Validate search options
+    this.validateSearchOptions(options);
+
+    try {
+      const result = await this.bookRepository.search(options);
+      return {
+        ...result,
+        books: result.books.map(this.transformBookData)
+      };
+    } catch (error) {
+      throw new Error(`Failed to search books: ${error}`);
+    }
+  }
+
+  /**
+   * Search books by ID or title (simplified method for backward compatibility)
+   * @param searchTerm Search term to match against ID or title
+   * @param searchById Whether to search by ID
+   * @param searchByTitle Whether to search by title
    * @returns Promise<Book[]> Array of matching books
    */
-  async searchBooks(searchTerm: string): Promise<Book[]> {
+  async searchBooksSimple(searchTerm: string, searchById: boolean = false, searchByTitle: boolean = false): Promise<Book[]> {
     if (!searchTerm || typeof searchTerm !== 'string') {
       throw new Error('Search term must be a valid string');
     }
 
-    try {
-      const allBooks = await this.bookRepository.findAll();
-      const searchLower = searchTerm.toLowerCase().trim();
+    const options: SearchOptions = {
+      searchTerm: searchTerm.trim(),
+      searchById,
+      searchByTitle
+    };
 
-      return allBooks
-        .filter((book: any) =>
-          book.Author.toLowerCase().includes(searchLower) ||
-          book.Title.toLowerCase().includes(searchLower) ||
-          (book.Genre && book.Genre.toLowerCase().includes(searchLower)) ||
-          (book.ISBN && book.ISBN.toLowerCase().includes(searchLower)) ||
-          (book.Description && book.Description.toLowerCase().includes(searchLower))
-        )
-        .map(this.transformBookData);
+    try {
+      const result = await this.searchBooks(options);
+      return result.books;
     } catch (error) {
       throw new Error(`Failed to search books: ${error}`);
+    }
+  }
+
+  /**
+   * Get all books sorted by specified criteria
+   * @param sortBy Sort criteria (id, title, author, genre, publicationYear)
+   * @param sortOrder Sort order (asc or desc)
+   * @returns Promise<Book[]> Array of sorted books
+   */
+  async getSortedBooks(sortBy: 'id' | 'title' | 'author' | 'genre' | 'publicationYear', sortOrder: 'asc' | 'desc' = 'asc'): Promise<Book[]> {
+    const options: SearchOptions = {
+      sortBy,
+      sortOrder
+    };
+
+    try {
+      const result = await this.searchBooks(options);
+      return result.books;
+    } catch (error) {
+      throw new Error(`Failed to get sorted books: ${error}`);
+    }
+  }
+
+  /**
+   * Get books filtered by genre
+   * @param genre Genre to filter by
+   * @param sortBy Optional sort criteria
+   * @param sortOrder Optional sort order
+   * @returns Promise<Book[]> Array of filtered books
+   */
+  async getBooksByGenre(genre: string, sortBy?: 'id' | 'title' | 'author' | 'genre' | 'publicationYear', sortOrder: 'asc' | 'desc' = 'asc'): Promise<Book[]> {
+    if (!genre || typeof genre !== 'string') {
+      throw new Error('Genre must be a valid string');
+    }
+
+    const options: SearchOptions = {
+      filterByGenre: genre.trim(),
+      sortBy,
+      sortOrder
+    };
+
+    try {
+      const result = await this.searchBooks(options);
+      return result.books;
+    } catch (error) {
+      throw new Error(`Failed to get books by genre: ${error}`);
+    }
+  }
+
+  /**
+   * Get all unique genres
+   * @returns Promise<string[]> Array of unique genres
+   */
+  async getAllGenres(): Promise<string[]> {
+    try {
+      return await this.bookRepository.getAllGenres();
+    } catch (error) {
+      throw new Error(`Failed to get genres: ${error}`);
     }
   }
 
@@ -336,5 +412,27 @@ export class BookService {
   private generateBookId(): string {
     // Simple UUID-like ID generator
     return 'book-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
+   * Validate search options
+   * @private
+   */
+  private validateSearchOptions(options: SearchOptions): void {
+    if (options.searchTerm && typeof options.searchTerm !== 'string') {
+      throw new Error('Search term must be a string');
+    }
+
+    if (options.sortBy && !['id', 'title', 'author', 'genre', 'publicationYear'].includes(options.sortBy)) {
+      throw new Error('Invalid sort criteria. Must be one of: id, title, author, genre, publicationYear');
+    }
+
+    if (options.sortOrder && !['asc', 'desc'].includes(options.sortOrder)) {
+      throw new Error('Invalid sort order. Must be either asc or desc');
+    }
+
+    if (options.filterByGenre && typeof options.filterByGenre !== 'string') {
+      throw new Error('Filter by genre must be a string');
+    }
   }
 }

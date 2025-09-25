@@ -36,13 +36,63 @@ export class MainController extends BaseController {
     };
 
     /**
-     * Display all books as an HTML table
+     * Display all books as an HTML table with search and sort functionality
      * GET /table
      */
     getBooksTable = async (req: Request, res: Response): Promise<void> => {
         try {
-            const books = await this.bookService.getAllBooks();
-            res.render('books/table', { books });
+            // Get query parameters for search and sort
+            const { search, searchBy, sortBy, sortOrder, genre } = req.query;
+
+            let books;
+            let searchMessage = '';
+
+            // If search parameters are provided, use search functionality
+            if (search || sortBy || genre) {
+                const searchOptions: any = {};
+
+                if (search) {
+                    searchOptions.searchTerm = search as string;
+                    if (searchBy === 'id') {
+                        searchOptions.searchById = true;
+                    } else if (searchBy === 'title') {
+                        searchOptions.searchByTitle = true;
+                    }
+                    searchMessage += `Search: "${search}" `;
+                }
+
+                if (sortBy) {
+                    searchOptions.sortBy = sortBy as string;
+                    searchOptions.sortOrder = (sortOrder as string) || 'asc';
+                    searchMessage += `Sorted by: ${sortBy} (${searchOptions.sortOrder}) `;
+                }
+
+                if (genre) {
+                    searchOptions.filterByGenre = genre as string;
+                    searchMessage += `Genre: ${genre} `;
+                }
+
+                const searchResult = await this.bookService.searchBooks(searchOptions);
+                books = searchResult.books;
+            } else {
+                books = await this.bookService.getAllBooks();
+            }
+
+            // Get all genres for the filter dropdown
+            const allGenres = await this.bookService.getAllGenres();
+
+
+            // Use EJS template but pass search data
+            res.render('books/table', {
+                books,
+                allGenres,
+                searchMessage,
+                search: search || '',
+                searchBy: searchBy || '',
+                sortBy: sortBy || '',
+                sortOrder: sortOrder || '',
+                genre: genre || ''
+            });
         } catch (error) {
             console.error('Error fetching books for table display:', error);
             res.status(500).render('partials/error', {

@@ -47,3 +47,26 @@ export interface DatabaseInfo {
   databasePath: string;
   lastUpdated: string;
 }
+
+/**
+ * Search options interface
+ */
+export interface SearchOptions {
+  searchTerm?: string;
+  searchById?: boolean;
+  searchByTitle?: boolean;
+  sortBy?: 'id' | 'title' | 'author' | 'genre' | 'publicationYear';
+  sortOrder?: 'asc' | 'desc';
+  filterByGenre?: string;
+}
+
+/**
+ * Search result interface
+ */
+export interface SearchResult {
+  books: Book[];
+  totalCount: number;
+  searchTerm?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}

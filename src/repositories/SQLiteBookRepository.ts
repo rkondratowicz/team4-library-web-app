@@ -1,6 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
-import { Book, UpdateBookInput } from '../models/Book.js';
+import { Book, UpdateBookInput, SearchOptions, SearchResult } from '../models/Book.js';
 import { IBookRepository } from './interfaces.js';
 
 /**
@@ -137,6 +137,97 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Search books with various criteria and sorting options
+   * @param options Search options including search term, sort criteria, and filters
+   * @returns Promise<SearchResult> Search results with books and metadata
+   */
+  async search(options: SearchOptions): Promise<SearchResult> {
+    return new Promise((resolve, reject) => {
+      let query = 'SELECT * FROM books';
+      const params: any[] = [];
+      const whereConditions: string[] = [];
+
+      // Add search conditions
+      if (options.searchTerm) {
+        const searchTerm = `%${options.searchTerm}%`;
+
+        if (options.searchById && options.searchByTitle) {
+          whereConditions.push('(ID LIKE ? OR Title LIKE ?)');
+          params.push(searchTerm, searchTerm);
+        } else if (options.searchById) {
+          whereConditions.push('ID LIKE ?');
+          params.push(searchTerm);
+        } else if (options.searchByTitle) {
+          whereConditions.push('Title LIKE ?');
+          params.push(searchTerm);
+        } else {
+          // Default: search in all text fields
+          whereConditions.push('(ID LIKE ? OR Title LIKE ? OR Author LIKE ? OR Genre LIKE ? OR ISBN LIKE ? OR Description LIKE ?)');
+          params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+        }
+      }
+
+      // Add genre filter
+      if (options.filterByGenre) {
+        whereConditions.push('Genre = ?');
+        params.push(options.filterByGenre);
+      }
+
+      // Build WHERE clause
+      if (whereConditions.length > 0) {
+        query += ' WHERE ' + whereConditions.join(' AND ');
+      }
+
+      // Add sorting
+      if (options.sortBy) {
+        const sortColumn = this.getSortColumn(options.sortBy);
+        const sortOrder = options.sortOrder === 'desc' ? 'DESC' : 'ASC';
+        query += ` ORDER BY ${sortColumn} ${sortOrder}`;
+      } else {
+        // Default sort by Author, then Title
+        query += ' ORDER BY Author, Title';
+      }
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) {
+          reject(new Error(`Database search failed: ${err.message}`));
+        } else {
+          const books = rows as Book[];
+          const result: SearchResult = {
+            books,
+            totalCount: books.length,
+            searchTerm: options.searchTerm,
+            sortBy: options.sortBy,
+            sortOrder: options.sortOrder
+          };
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  /**
+   * Get all unique genres in the database
+   * @returns Promise<string[]> Array of unique genres
+   */
+  async getAllGenres(): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT DISTINCT Genre FROM books WHERE Genre IS NOT NULL AND Genre != "" ORDER BY Genre',
+        [],
+        (err, rows) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            const genres = (rows as { Genre: string }[]).map(row => row.Genre);
+            resolve(genres);
+          }
+        }
+      );
+    });
+  }
+
+  /**
    * Find all copies for a specific book
    * @param bookId Book ID
    * @returns Promise<any[]> Array of copies for the book
@@ -144,8 +235,8 @@ export class SQLiteBookRepository implements IBookRepository {
   async findCopiesByBookId(bookId: string): Promise<any[]> {
     return new Promise((resolve, reject) => {
       this.db.all(
-        'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID', 
-        [bookId], 
+        'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID',
+        [bookId],
         (err, rows) => {
           if (err) {
             reject(new Error(`Database query failed: ${err.message}`));
@@ -174,7 +265,7 @@ export class SQLiteBookRepository implements IBookRepository {
         LEFT JOIN copy_statistics_view cs ON b.ID = cs.BookID
         WHERE b.ID = ?
       `;
-      
+
       this.db.get(query, [bookId], (err, row) => {
         if (err) {
           reject(new Error(`Database query failed: ${err.message}`));
@@ -183,5 +274,26 @@ export class SQLiteBookRepository implements IBookRepository {
         }
       });
     });
+  }
+
+  /**
+   * Map sort criteria to database column names
+   * @private
+   */
+  private getSortColumn(sortBy: string): string {
+    switch (sortBy) {
+      case 'id':
+        return 'ID';
+      case 'title':
+        return 'Title';
+      case 'author':
+        return 'Author';
+      case 'genre':
+        return 'Genre';
+      case 'publicationYear':
+        return 'PublicationYear';
+      default:
+        return 'ID';
+    }
   }
 }
