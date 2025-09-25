@@ -1,8 +1,8 @@
 -- Migration 02: Extend books table with additional fields
 -- Based on PRD requirements: ISBN, Genre, PublicationYear, Description
--- ISBN column already exists, adding remaining columns
 
--- Add remaining columns to existing books table
+-- Add all required columns to existing books table
+ALTER TABLE books ADD COLUMN ISBN TEXT;
 ALTER TABLE books ADD COLUMN Genre TEXT;
 ALTER TABLE books ADD COLUMN PublicationYear INTEGER;
 ALTER TABLE books ADD COLUMN Description TEXT;
