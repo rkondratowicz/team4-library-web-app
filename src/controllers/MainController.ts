@@ -75,7 +75,7 @@ export class MainController extends BaseController {
                 const searchResult = await this.bookService.searchBooks(searchOptions);
                 books = searchResult.books;
             } else {
-                books = await this.bookService.getAllBooks();
+                books = await this.bookService.getAllBooksWithStats();
             }
 
             // Get all genres for the filter dropdown

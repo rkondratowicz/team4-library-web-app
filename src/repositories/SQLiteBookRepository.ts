@@ -266,6 +266,33 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Find all books with copy statistics
+   * @returns Promise<any[]> Array of books with copy statistics
+   */
+  async findAllWithCopyStats(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          b.*,
+          COALESCE(cs.TotalCopies, 0) as TotalCopies,
+          COALESCE(cs.AvailableCopies, 0) as AvailableCopies,
+          COALESCE(cs.BorrowedCopies, 0) as BorrowedCopies
+        FROM books b
+        LEFT JOIN copy_statistics_view cs ON b.ID = cs.BookID
+        ORDER BY b.Author, b.Title
+      `;
+
+      this.db.all(query, [], (err, rows) => {
+        if (err) {
+          reject(new Error(`Database query failed: ${err.message}`));
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
    * Get book details with copy statistics
    * @param bookId Book ID
    * @returns Promise<any> Book with copy statistics

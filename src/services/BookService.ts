@@ -32,6 +32,24 @@ export class BookService {
   }
 
   /**
+   * Get all books with copy statistics
+   * @returns Promise<any[]> Array of books with copy statistics
+   */
+  async getAllBooksWithStats(): Promise<any[]> {
+    try {
+      const books = await this.bookRepository.findAllWithCopyStats();
+      return books.map((book: any) => ({
+        ...this.transformBookData(book),
+        totalCopies: book.TotalCopies || 0,
+        availableCopies: book.AvailableCopies || 0,
+        borrowedCopies: book.BorrowedCopies || 0
+      }));
+    } catch (error) {
+      throw new Error(`Failed to retrieve books with statistics: ${error}`);
+    }
+  }
+
+  /**
    * Get a book by ID
    * @param id Book ID
    * @returns Promise<Book | null> The book if found, null otherwise
