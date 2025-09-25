@@ -147,10 +147,19 @@ export class MainController extends BaseController {
             const { Author, Title, ISBN, Genre, PublicationYear, Description } = req.body;
 
             const bookData: any = { Author, Title };
-            if (ISBN) bookData.ISBN = ISBN;
-            if (Genre) bookData.Genre = Genre;
-            if (PublicationYear) bookData.PublicationYear = parseInt(PublicationYear) || null;
-            if (Description) bookData.Description = Description;
+            
+            // Always include ISBN, Genre, and Description (even if empty string)
+            bookData.ISBN = ISBN || '';
+            bookData.Genre = Genre || '';
+            bookData.Description = Description || '';
+            
+            // Handle PublicationYear - convert to number or null if empty/invalid
+            if (PublicationYear && PublicationYear.trim() !== '') {
+                const year = parseInt(PublicationYear);
+                bookData.PublicationYear = isNaN(year) ? null : year;
+            } else {
+                bookData.PublicationYear = null;
+            }
 
             const updated = await this.bookService.updateBook(id, bookData);
 
@@ -168,6 +177,11 @@ export class MainController extends BaseController {
             res.render('partials/success', {
                 title: 'Book Updated Successfully!',
                 message: `The book "${Title}" by ${Author} has been updated successfully.`,
+                details: {
+                    'Book ID': id,
+                    'Title': Title,
+                    'Author': Author
+                },
                 backUrl: '/table',
                 backText: 'Back to Books Table',
                 autoRedirect: {
