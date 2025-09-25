@@ -1,0 +1,123 @@
+<h1>📚 Add New Book</h1>
+
+<div class="form-description">
+    <p><strong>Add a new book to the library catalog.</strong> Fill in the required information below. The book ID will be automatically generated if not provided.</p>
+</div>
+
+<form action="/add-book" method="POST">
+    <div class="form-group">
+        <label for="id">Book ID (Optional):</label>
+        <input type="text" id="id" name="ID" placeholder="Leave empty for auto-generation" maxlength="50">
+    </div>
+    
+    <div class="form-group">
+        <label for="author">Author: <span class="required">*</span></label>
+        <input type="text" id="author" name="Author" placeholder="Enter author name" required maxlength="255">
+    </div>
+    
+    <div class="form-group">
+        <label for="title">Title: <span class="required">*</span></label>
+        <input type="text" id="title" name="Title" placeholder="Enter book title" required maxlength="500">
+    </div>
+    
+    <div class="form-group">
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="ISBN" placeholder="e.g., 978-0-452-28423-4" maxlength="20">
+    </div>
+    
+    <div class="form-group">
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="Genre" placeholder="e.g., Fiction, Mystery, Romance" maxlength="100">
+    </div>
+    
+    <div class="form-group">
+        <label for="publicationYear">Publication Year:</label>
+        <input type="number" id="publicationYear" name="PublicationYear" placeholder="e.g., 1949" min="1000" max="2030">
+    </div>
+    
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="Description" placeholder="Enter book description..." maxlength="1000" rows="4"></textarea>
+    </div>
+    
+    <div class="button-group">
+        <button type="submit" class="btn btn-primary">💾 Add Book</button>
+        <a href="/table" class="btn btn-secondary">❌ Cancel</a>
+    </div>
+</form>
+
+<style>
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+}
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s;
+}
+.btn-primary {
+    background-color: #28a745;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #1e7e34;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+.form-description {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+}
+.required {
+    color: #dc3545;
+}
+</style>

@@ -1,0 +1,79 @@
+<h1>✅ <%= title %></h1>
+<div class="success-message">
+    <%= message %>
+</div>
+<% if (details) { %>
+<div class="book-details">
+    <% Object.keys(details).forEach(function(key) { %>
+        <p><strong><%= key %>:</strong> <%= details[key] %></p>
+    <% }); %>
+</div>
+<% } %>
+<% if (additionalLinks && additionalLinks.length > 0) { %>
+    <% additionalLinks.forEach(function(link) { %>
+        <a href="<%= link.url %>" class="<%= link.class || 'btn' %>"><%= link.text %></a>
+    <% }); %>
+<% } %>
+<% if (backUrl) { %>
+<a href="<%= backUrl %>" class="back-link">← <%= backText || 'Back' %></a>
+<% } %>
+<% if (autoRedirect) { %>
+<script>
+// Auto-redirect after <%= autoRedirect.delay || 3 %> seconds
+setTimeout(() => {
+    window.location.href = '<%= autoRedirect.url %>';
+}, <%= (autoRedirect.delay || 3) * 1000 %>);
+</script>
+<% } %>
+
+<style>
+h1 {
+    text-align: center;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+}
+.book-details {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+.book-details strong {
+    color: #495057;
+}
+.container {
+    text-align: center;
+}
+.btn {
+    display: inline-block;
+    margin: 10px;
+    color: #007bff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+.btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+.add-another {
+    color: #28a745;
+    border-color: #28a745;
+}
+.add-another:hover {
+    background-color: #28a745;
+    color: white;
+}
+</style>
