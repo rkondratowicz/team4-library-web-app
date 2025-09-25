@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
 import { Book, UpdateBookInput, SearchOptions, SearchResult } from '../models/Book.js';
+import { Copy, CreateCopyInput } from '../models/Copy.js';
 import { IBookRepository } from './interfaces.js';
 
 /**
@@ -230,9 +231,9 @@ export class SQLiteBookRepository implements IBookRepository {
   /**
    * Find all copies for a specific book
    * @param bookId Book ID
-   * @returns Promise<any[]> Array of copies for the book
+   * @returns Promise<Copy[]> Array of copies for the book
    */
-  async findCopiesByBookId(bookId: string): Promise<any[]> {
+  async findCopiesByBookId(bookId: string): Promise<Copy[]> {
     return new Promise((resolve, reject) => {
       this.db.all(
         'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID',
@@ -241,7 +242,7 @@ export class SQLiteBookRepository implements IBookRepository {
           if (err) {
             reject(new Error(`Database query failed: ${err.message}`));
           } else {
-            resolve(rows || []);
+            resolve((rows || []) as Copy[]);
           }
         }
       );
@@ -334,6 +335,69 @@ export class SQLiteBookRepository implements IBookRepository {
             reject(new Error(`Database update failed: ${err.message}`));
           } else {
             resolve(this.changes > 0);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Create a new copy for a book
+   * @param copyData Copy data input
+   * @returns Promise<string> The generated copy ID
+   */
+  async createCopy(copyData: CreateCopyInput): Promise<string> {
+    const copyId = await this.getNextCopyId();
+    const status = copyData.Status || 'Available';
+
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'INSERT INTO copies (CopyID, BookID, Status) VALUES (?, ?, ?)',
+        [copyId, copyData.BookID, status],
+        function (err) {
+          if (err) {
+            reject(new Error(`Failed to create copy: ${err.message}`));
+          } else {
+            resolve(copyId);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Get the next available copy ID following the naming convention
+   * Format: COPY-{sequential_number}-{abbreviated_title}-{letter}
+   * @returns Promise<string> The next copy ID
+   */
+  async getNextCopyId(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      // Get the highest sequential number from existing copies
+      this.db.get(
+        `SELECT CopyID FROM copies 
+         WHERE CopyID LIKE 'COPY-%' 
+         ORDER BY CAST(SUBSTR(CopyID, 6, 3) AS INTEGER) DESC 
+         LIMIT 1`,
+        (err, row: any) => {
+          if (err) {
+            reject(new Error(`Failed to get next copy ID: ${err.message}`));
+          } else {
+            let nextSequential = 1;
+            if (row && row.CopyID) {
+              // Extract the sequential number from the existing copy ID
+              const match = row.CopyID.match(/^COPY-(\d+)-/);
+              if (match) {
+                nextSequential = parseInt(match[1]) + 1;
+              }
+            }
+
+            // Format the sequential number with leading zeros (3 digits)
+            const formattedSequential = nextSequential.toString().padStart(3, '0');
+
+            // Generate a generic copy ID for now (we'll enhance this later if needed)
+            const copyId = `COPY-${formattedSequential}-GENERIC-A`;
+
+            resolve(copyId);
           }
         }
       );

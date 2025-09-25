@@ -1,4 +1,5 @@
 import { Book, UpdateBookInput, DatabaseInfo, SearchOptions, SearchResult } from '../models/Book.js';
+import { Copy, CreateCopyInput } from '../models/Copy.js';
 
 /**
  * Interface for Book Repository
@@ -44,7 +45,17 @@ export interface IBookRepository {
   /**
    * Find all copies for a specific book
    */
-  findCopiesByBookId(bookId: string): Promise<any[]>;
+  findCopiesByBookId(bookId: string): Promise<Copy[]>;
+
+  /**
+   * Create a new copy for a book
+   */
+  createCopy(copyData: CreateCopyInput): Promise<string>;
+
+  /**
+   * Get the next available copy ID for a book
+   */
+  getNextCopyId(): Promise<string>;
 
   /**
    * Get book details with copy statistics
