@@ -1,4 +1,5 @@
 import { Book, CreateBookInput, UpdateBookInput, SearchOptions, SearchResult } from '../models/Book.js';
+import { Copy, CreateCopyInput } from '../models/Copy.js';
 
 /**
  * BookService handles all business logic related to books
@@ -412,6 +413,51 @@ export class BookService {
   private generateBookId(): string {
     // Simple UUID-like ID generator
     return 'book-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
+   * Get all copies for a specific book
+   * @param bookId Book ID
+   * @returns Promise<Copy[]> Array of copies for the book
+   */
+  async getCopiesForBook(bookId: string): Promise<Copy[]> {
+    try {
+      // First validate that the book exists
+      const book = await this.bookRepository.findById(bookId);
+      if (!book) {
+        throw new Error('Book not found');
+      }
+
+      const copies = await this.bookRepository.findCopiesByBookId(bookId);
+      return copies;
+    } catch (error) {
+      throw new Error(`Failed to retrieve copies for book: ${error}`);
+    }
+  }
+
+  /**
+   * Create a new copy for a book
+   * @param bookId Book ID
+   * @returns Promise<string> The ID of the created copy
+   */
+  async createCopyForBook(bookId: string): Promise<string> {
+    try {
+      // First validate that the book exists
+      const book = await this.bookRepository.findById(bookId);
+      if (!book) {
+        throw new Error('Book not found');
+      }
+
+      const copyData: CreateCopyInput = {
+        BookID: bookId,
+        Status: 'Available'
+      };
+
+      const copyId = await this.bookRepository.createCopy(copyData);
+      return copyId;
+    } catch (error) {
+      throw new Error(`Failed to create copy: ${error}`);
+    }
   }
 
   /**
