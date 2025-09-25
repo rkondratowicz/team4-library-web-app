@@ -470,6 +470,13 @@ export class MainController extends BaseController {
               .btn-secondary:hover {
                   background-color: #545b62;
               }
+              .btn-danger {
+                  background-color: #dc3545;
+                  color: white;
+              }
+              .btn-danger:hover {
+                  background-color: #c82333;
+              }
               .book-id {
                   background-color: #f8f9fa;
                   padding: 8px 12px;
@@ -501,10 +508,43 @@ export class MainController extends BaseController {
                   
                   <div class="button-group">
                       <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                      <button type="button" class="btn btn-danger" onclick="confirmDelete('${book.ID}', '${book.Title.replace(/'/g, "\\'")}')">🗑️ Delete Book</button>
                       <a href="/table" class="btn btn-secondary">❌ Cancel</a>
                   </div>
               </form>
           </div>
+          
+          <script>
+              function confirmDelete(bookId, bookTitle) {
+                  if (confirm('Are you sure you want to delete "' + bookTitle + '"?\\n\\nThis action cannot be undone.')) {
+                      deleteBook(bookId);
+                  }
+              }
+              
+              function deleteBook(bookId) {
+                  fetch('/api/books/' + bookId, {
+                      method: 'DELETE',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      }
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                      if (data.success) {
+                          // Show success message and redirect
+                          alert('Book deleted successfully!');
+                          window.location.href = '/table';
+                      } else {
+                          // Show error message
+                          alert('Error deleting book: ' + data.error);
+                      }
+                  })
+                  .catch(error => {
+                      console.error('Error:', error);
+                      alert('An error occurred while deleting the book. Please try again.');
+                  });
+              }
+          </script>
       </body>
       </html>
       `;
