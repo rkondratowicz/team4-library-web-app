@@ -18,7 +18,7 @@
     </thead>
     <tbody>
         <% books.forEach(function(book) { %>
-        <tr>
+        <tr class="book-row" data-book-id="<%= book.ID %>" onclick="viewBookDetails('<%= book.ID %>')">
             <td><%= book.ID %></td>
             <td><%= book.Author %></td>
             <td><%= book.Title %></td>
@@ -26,7 +26,7 @@
             <td><%= book.Genre || '' %></td>
             <td><%= book.PublicationYear || '' %></td>
             <td title="<%= book.Description || '' %>"><%= book.Description ? (book.Description.length > 50 ? book.Description.substring(0, 50) + '...' : book.Description) : '' %></td>
-            <td><a href="/edit/<%= book.ID %>" class="edit-btn">Edit</a></td>
+            <td><a href="/edit/<%= book.ID %>" class="edit-btn" onclick="event.stopPropagation()">Edit</a></td>
         </tr>
         <% }); %>
     </tbody>
@@ -69,6 +69,15 @@ th {
 }
 tr:hover {
     background-color: #f8f9fa;
+}
+.book-row {
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.book-row:hover {
+    background-color: #e3f2fd !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .edit-btn {
     background-color: #007bff;
@@ -117,3 +126,19 @@ tr:hover {
     color: white;
 }
 </style>
+
+<script>
+function viewBookDetails(bookId) {
+    window.location.href = '/book/' + encodeURIComponent(bookId);
+}
+
+// Add visual feedback for clickable rows
+document.addEventListener('DOMContentLoaded', function() {
+    const bookRows = document.querySelectorAll('.book-row');
+    bookRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.cursor = 'pointer';
+        });
+    });
+});
+</script>

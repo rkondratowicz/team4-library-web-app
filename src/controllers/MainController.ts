@@ -226,6 +226,44 @@ export class MainController extends BaseController {
     };
 
     /**
+     * Display book details with copies information
+     * GET /book/:id
+     */
+    getBookDetails = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const bookWithCopies = await this.bookService.getBookWithCopies(id);
+
+            if (!bookWithCopies) {
+                res.status(404).render('partials/error', {
+                    title: 'Book Not Found',
+                    description: `The book with ID "${id}" could not be found.`,
+                    backUrl: '/table',
+                    backText: 'Back to Books Table'
+                });
+                return;
+            }
+
+            res.render('books/details', {
+                book: bookWithCopies,
+                copies: bookWithCopies.copies,
+                totalCopies: bookWithCopies.totalCopies,
+                availableCopies: bookWithCopies.availableCopies,
+                borrowedCopies: bookWithCopies.borrowedCopies
+            });
+        } catch (error) {
+            console.error('Error fetching book details:', error);
+            res.status(500).render('partials/error', {
+                title: 'Error',
+                description: 'Failed to fetch book details from database',
+                error: error,
+                backUrl: '/table',
+                backText: 'Back to Books Table'
+            });
+        }
+    };
+
+    /**
      * Get database information
      * GET /api/database/info
      */
