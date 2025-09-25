@@ -18,6 +18,12 @@ export function createMainRoutes(mainController: MainController): Router {
   // GET /table - Books table view
   router.get('/table', mainController.getBooksTable);
 
+  // GET /add-book - Add new book form
+  router.get('/add-book', mainController.getAddBookForm);
+
+  // POST /add-book - Create new book from form
+  router.post('/add-book', mainController.createBookFromForm);
+
   // GET /edit/:id - Edit book form
   router.get('/edit/:id', mainController.getEditBookForm);
 

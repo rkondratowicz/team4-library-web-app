@@ -236,8 +236,23 @@ export class MainController extends BaseController {
               .edit-btn:hover {
                   background-color: #0056b3;
               }
-              .book-count {
+              .add-book-btn {
+                  background-color: #28a745;
+                  color: white;
+                  padding: 10px 20px;
+                  text-decoration: none;
+                  border-radius: 4px;
+                  font-size: 1em;
+                  font-weight: bold;
+                  transition: background-color 0.3s;
+                  display: inline-block;
                   margin-bottom: 20px;
+              }
+              .add-book-btn:hover {
+                  background-color: #1e7e34;
+              }
+              .book-count {
+                  margin-bottom: 10px;
                   color: #666;
                   font-style: italic;
               }
@@ -262,6 +277,7 @@ export class MainController extends BaseController {
               <a href="/" class="back-link">← Back to Main Menu</a>
               <h1>📚 Library Books Database</h1>
               <div class="book-count">Total books: ${books.length}</div>
+              <a href="/add-book" class="add-book-btn">➕ Add New Book</a>
               
               <table>
                   <thead>
@@ -650,6 +666,355 @@ export class MainController extends BaseController {
                   <a href="/table">← Back to Books Table</a>
               </body>
           </html>
+      `);
+    }
+  };
+
+  /**
+   * Display form for adding a new book
+   * GET /add-book
+   */
+  getAddBookForm = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Add New Book - Library Management System</title>
+          <style>
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  color: #333;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 16px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+              }
+              h1 {
+                  color: #333;
+                  text-align: center;
+                  margin-bottom: 30px;
+              }
+              .form-group {
+                  margin-bottom: 20px;
+              }
+              label {
+                  display: block;
+                  margin-bottom: 8px;
+                  font-weight: bold;
+                  color: #555;
+              }
+              input[type="text"] {
+                  width: 100%;
+                  padding: 12px;
+                  border: 1px solid #ddd;
+                  border-radius: 4px;
+                  font-size: 16px;
+                  box-sizing: border-box;
+              }
+              input[type="text"]:focus {
+                  outline: none;
+                  border-color: #007bff;
+                  box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+              }
+              .button-group {
+                  display: flex;
+                  gap: 10px;
+                  justify-content: center;
+                  margin-top: 30px;
+              }
+              .btn {
+                  padding: 12px 24px;
+                  border: none;
+                  border-radius: 4px;
+                  font-size: 16px;
+                  cursor: pointer;
+                  text-decoration: none;
+                  display: inline-block;
+                  text-align: center;
+                  transition: all 0.3s;
+              }
+              .btn-primary {
+                  background-color: #28a745;
+                  color: white;
+              }
+              .btn-primary:hover {
+                  background-color: #1e7e34;
+              }
+              .btn-secondary {
+                  background-color: #6c757d;
+                  color: white;
+              }
+              .btn-secondary:hover {
+                  background-color: #545b62;
+              }
+              .form-description {
+                  background-color: #f8f9fa;
+                  padding: 15px;
+                  border-radius: 4px;
+                  margin-bottom: 20px;
+                  border-left: 4px solid #007bff;
+              }
+              .required {
+                  color: #dc3545;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>📚 Add New Book</h1>
+              
+              <div class="form-description">
+                  <p><strong>Add a new book to the library catalog.</strong> Fill in the required information below. The book ID will be automatically generated if not provided.</p>
+              </div>
+              
+              <form action="/add-book" method="POST">
+                  <div class="form-group">
+                      <label for="id">Book ID (Optional):</label>
+                      <input type="text" id="id" name="ID" placeholder="Leave empty for auto-generation" maxlength="50">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="author">Author: <span class="required">*</span></label>
+                      <input type="text" id="author" name="Author" placeholder="Enter author name" required maxlength="255">
+                  </div>
+                  
+                  <div class="form-group">
+                      <label for="title">Title: <span class="required">*</span></label>
+                      <input type="text" id="title" name="Title" placeholder="Enter book title" required maxlength="500">
+                  </div>
+                  
+                  <div class="button-group">
+                      <button type="submit" class="btn btn-primary">💾 Add Book</button>
+                      <a href="/table" class="btn btn-secondary">❌ Cancel</a>
+                  </div>
+              </form>
+          </div>
+      </body>
+      </html>
+      `;
+
+      res.send(html);
+    } catch (error) {
+      console.error('Error displaying add book form:', error);
+      res.status(500).send(`
+          <html>
+              <body>
+                  <h1>Error</h1>
+                  <p>Failed to load add book form</p>
+                  <a href="/table">← Back to Books Table</a>
+              </body>
+          </html>
+      `);
+    }
+  };
+
+  /**
+   * Handle form submission for creating a new book
+   * POST /add-book
+   */
+  createBookFromForm = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { ID, Author, Title } = req.body;
+      
+      // Create book data object
+      const bookData: any = { Author, Title };
+      if (ID && ID.trim()) {
+        bookData.ID = ID.trim();
+      }
+      
+      const newBook = await this.bookService.createBook(bookData);
+      
+      // Success - redirect to table with success message
+      res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Book Added - Library Management System</title>
+          <style>
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  color: #333;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 16px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                  text-align: center;
+              }
+              .success-message {
+                  background-color: #d4edda;
+                  color: #155724;
+                  padding: 15px;
+                  border-radius: 4px;
+                  margin-bottom: 20px;
+                  border: 1px solid #c3e6cb;
+              }
+              .book-details {
+                  background-color: #f8f9fa;
+                  padding: 15px;
+                  border-radius: 4px;
+                  margin-bottom: 20px;
+                  text-align: left;
+              }
+              .book-details strong {
+                  color: #495057;
+              }
+              .back-link {
+                  display: inline-block;
+                  margin-top: 20px;
+                  color: #007bff;
+                  text-decoration: none;
+                  padding: 8px 16px;
+                  border: 1px solid #007bff;
+                  border-radius: 4px;
+                  transition: all 0.3s;
+              }
+              .back-link:hover {
+                  background-color: #007bff;
+                  color: white;
+              }
+              .add-another {
+                  display: inline-block;
+                  margin: 10px;
+                  color: #28a745;
+                  text-decoration: none;
+                  padding: 8px 16px;
+                  border: 1px solid #28a745;
+                  border-radius: 4px;
+                  transition: all 0.3s;
+              }
+              .add-another:hover {
+                  background-color: #28a745;
+                  color: white;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>✅ Book Added Successfully!</h1>
+              <div class="success-message">
+                  The book has been added to the library catalog successfully.
+              </div>
+              <div class="book-details">
+                  <p><strong>Book ID:</strong> ${newBook.ID}</p>
+                  <p><strong>Title:</strong> ${newBook.Title}</p>
+                  <p><strong>Author:</strong> ${newBook.Author}</p>
+              </div>
+              <a href="/add-book" class="add-another">➕ Add Another Book</a>
+              <a href="/table" class="back-link">← Back to Books Table</a>
+          </div>
+          <script>
+              // Auto-redirect after 5 seconds
+              setTimeout(() => {
+                  window.location.href = '/table';
+              }, 5000);
+          </script>
+      </body>
+      </html>
+      `);
+    } catch (error) {
+      console.error('Error creating book from form:', error);
+      
+      // Extract error message for better user experience
+      let errorMessage = 'An unexpected error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      res.status(400).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Error Adding Book - Library Management System</title>
+          <style>
+              body {
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  min-height: 100vh;
+                  color: #333;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: white;
+                  padding: 40px;
+                  border-radius: 16px;
+                  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                  text-align: center;
+              }
+              .error-message {
+                  background-color: #f8d7da;
+                  color: #721c24;
+                  padding: 15px;
+                  border-radius: 4px;
+                  margin-bottom: 20px;
+                  border: 1px solid #f5c6cb;
+              }
+              .back-link {
+                  display: inline-block;
+                  margin: 10px;
+                  color: #007bff;
+                  text-decoration: none;
+                  padding: 8px 16px;
+                  border: 1px solid #007bff;
+                  border-radius: 4px;
+                  transition: all 0.3s;
+              }
+              .back-link:hover {
+                  background-color: #007bff;
+                  color: white;
+              }
+              .try-again {
+                  display: inline-block;
+                  margin: 10px;
+                  color: #28a745;
+                  text-decoration: none;
+                  padding: 8px 16px;
+                  border: 1px solid #28a745;
+                  border-radius: 4px;
+                  transition: all 0.3s;
+              }
+              .try-again:hover {
+                  background-color: #28a745;
+                  color: white;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>❌ Error Adding Book</h1>
+              <div class="error-message">
+                  <strong>Failed to add book:</strong> ${errorMessage}
+              </div>
+              <a href="/add-book" class="try-again">🔄 Try Again</a>
+              <a href="/table" class="back-link">← Back to Books Table</a>
+          </div>
+      </body>
+      </html>
       `);
     }
   };
