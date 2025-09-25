@@ -8,6 +8,23 @@ import { BookController } from '../controllers/BookController.js';
 export function createBookRoutes(bookController: BookController): Router {
   const router = Router();
 
+  // Search and filter routes (must come before :id routes to avoid conflicts)
+  // GET /api/books/search - Advanced search with multiple options
+  router.get('/search', bookController.searchBooks);
+
+  // GET /api/books/search/simple - Simple search by ID or title
+  router.get('/search/simple', bookController.searchBooksSimple);
+
+  // GET /api/books/sorted - Get sorted books
+  router.get('/sorted', bookController.getSortedBooks);
+
+  // GET /api/books/genres - Get all unique genres
+  router.get('/genres', bookController.getAllGenres);
+
+  // GET /api/books/genre/:genre - Get books by genre
+  router.get('/genre/:genre', bookController.getBooksByGenre);
+
+  // Standard CRUD routes
   // GET /api/books - Get all books
   router.get('/', bookController.getAllBooks);
 

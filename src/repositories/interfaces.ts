@@ -1,4 +1,4 @@
-import { Book, UpdateBookInput, DatabaseInfo } from '../models/Book.js';
+import { Book, UpdateBookInput, DatabaseInfo, SearchOptions, SearchResult } from '../models/Book.js';
 
 /**
  * Interface for Book Repository
@@ -30,6 +30,16 @@ export interface IBookRepository {
    * Delete a book from the database
    */
   delete(id: string): Promise<boolean>;
+
+  /**
+   * Search books with various criteria and sorting options
+   */
+  search(options: SearchOptions): Promise<SearchResult>;
+
+  /**
+   * Get all unique genres in the database
+   */
+  getAllGenres(): Promise<string[]>;
 }
 
 /**

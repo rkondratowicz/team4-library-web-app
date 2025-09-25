@@ -172,12 +172,50 @@ export class MainController extends BaseController {
     };
 
     /**
-     * Display all books as an HTML table
+     * Display all books as an HTML table with search and sort functionality
      * GET /table
      */
     getBooksTable = async (req: Request, res: Response): Promise<void> => {
         try {
-            const books = await this.bookService.getAllBooks();
+            // Get query parameters for search and sort
+            const { search, searchBy, sortBy, sortOrder, genre } = req.query;
+
+            let books;
+            let searchMessage = '';
+
+            // If search parameters are provided, use search functionality
+            if (search || sortBy || genre) {
+                const searchOptions: any = {};
+
+                if (search) {
+                    searchOptions.searchTerm = search as string;
+                    if (searchBy === 'id') {
+                        searchOptions.searchById = true;
+                    } else if (searchBy === 'title') {
+                        searchOptions.searchByTitle = true;
+                    }
+                    searchMessage += `Search: "${search}" `;
+                }
+
+                if (sortBy) {
+                    searchOptions.sortBy = sortBy as string;
+                    searchOptions.sortOrder = (sortOrder as string) || 'asc';
+                    searchMessage += `Sorted by: ${sortBy} (${searchOptions.sortOrder}) `;
+                }
+
+                if (genre) {
+                    searchOptions.filterByGenre = genre as string;
+                    searchMessage += `Genre: ${genre} `;
+                }
+
+                const searchResult = await this.bookService.searchBooks(searchOptions);
+                books = searchResult.books;
+            } else {
+                books = await this.bookService.getAllBooks();
+            }
+
+            // Get all genres for the filter dropdown
+            const allGenres = await this.bookService.getAllGenres();
 
             let html = `
       <!DOCTYPE html>
@@ -188,12 +226,12 @@ export class MainController extends BaseController {
           <title>Library Books - Table View</title>
           <style>
               body {
-                  font-family: Arial, sans-serif;
+                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                   margin: 20px;
                   background-color: #f5f5f5;
               }
               .container {
-                  max-width: 1200px;
+                  max-width: 1400px;
                   margin: 0 auto;
                   background-color: white;
                   padding: 20px;
@@ -205,6 +243,99 @@ export class MainController extends BaseController {
                   text-align: center;
                   margin-bottom: 30px;
               }
+              
+              /* Search Bar Styles */
+              .search-container {
+                  background-color: #f8f9fa;
+                  padding: 20px;
+                  border-radius: 8px;
+                  margin-bottom: 20px;
+                  border: 1px solid #dee2e6;
+              }
+              .search-title {
+                  font-size: 1.2em;
+                  font-weight: bold;
+                  color: #495057;
+                  margin-bottom: 15px;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+              }
+              .search-form {
+                  display: grid;
+                  grid-template-columns: 1fr auto auto auto auto auto;
+                  gap: 15px;
+                  align-items: end;
+              }
+              .search-group {
+                  display: flex;
+                  flex-direction: column;
+                  gap: 5px;
+              }
+              .search-group label {
+                  font-weight: 500;
+                  color: #6c757d;
+                  font-size: 0.9em;
+              }
+              .search-input, .search-select {
+                  padding: 8px 12px;
+                  border: 1px solid #ced4da;
+                  border-radius: 4px;
+                  font-size: 14px;
+                  background-color: white;
+              }
+              .search-input:focus, .search-select:focus {
+                  outline: none;
+                  border-color: #007bff;
+                  box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+              }
+              .search-btn, .clear-btn {
+                  padding: 8px 16px;
+                  border: none;
+                  border-radius: 4px;
+                  font-size: 14px;
+                  cursor: pointer;
+                  text-decoration: none;
+                  display: inline-block;
+                  text-align: center;
+                  transition: all 0.3s;
+                  white-space: nowrap;
+              }
+              .search-btn {
+                  background-color: #007bff;
+                  color: white;
+              }
+              .search-btn:hover {
+                  background-color: #0056b3;
+              }
+              .clear-btn {
+                  background-color: #6c757d;
+                  color: white;
+              }
+              .clear-btn:hover {
+                  background-color: #5a6268;
+              }
+              .search-message {
+                  margin-top: 10px;
+                  padding: 8px;
+                  background-color: #d1ecf1;
+                  color: #0c5460;
+                  border-radius: 4px;
+                  font-size: 0.9em;
+              }
+              
+              /* Responsive search form */
+              @media (max-width: 768px) {
+                  .search-form {
+                      grid-template-columns: 1fr;
+                      gap: 10px;
+                  }
+                  .search-btn, .clear-btn {
+                      width: 100%;
+                  }
+              }
+              
+              /* Table Styles */
               table {
                   width: 100%;
                   border-collapse: collapse;
@@ -220,6 +351,8 @@ export class MainController extends BaseController {
                   font-weight: bold;
                   color: #495057;
                   border-top: 2px solid #007bff;
+                  position: sticky;
+                  top: 0;
               }
               tr:hover {
                   background-color: #f8f9fa;
@@ -270,49 +403,129 @@ export class MainController extends BaseController {
                   background-color: #007bff;
                   color: white;
               }
+              .no-results {
+                  text-align: center;
+                  padding: 40px;
+                  color: #6c757d;
+                  font-style: italic;
+              }
           </style>
       </head>
       <body>
           <div class="container">
               <a href="/" class="back-link">← Back to Main Menu</a>
               <h1>📚 Library Books Database</h1>
-              <div class="book-count">Total books: ${books.length}</div>
-              <a href="/add-book" class="add-book-btn">➕ Add New Book</a>
               
-              <table>
-                  <thead>
-                      <tr>
-                          <th>ID</th>
-                          <th>Author</th>
-                          <th>Title</th>
-                          <th>ISBN</th>
-                          <th>Genre</th>
-                          <th>Publication Year</th>
-                          <th>Description</th>
-                          <th>Actions</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-      `;
+              <!-- Search Bar -->
+              <div class="search-container">
+                  <div class="search-title">
+                      🔍 Search & Sort Books
+                  </div>
+                  <form class="search-form" method="GET" action="/table">
+                      <div class="search-group">
+                          <label for="search">Search Term</label>
+                          <input type="text" id="search" name="search" class="search-input" 
+                                 placeholder="Enter book title, author, or ID..." 
+                                 value="${(search as string) || ''}">
+                      </div>
+                      
+                      <div class="search-group">
+                          <label for="searchBy">Search In</label>
+                          <select id="searchBy" name="searchBy" class="search-select">
+                              <option value="">All Fields</option>
+                              <option value="title" ${searchBy === 'title' ? 'selected' : ''}>Title Only</option>
+                              <option value="id" ${searchBy === 'id' ? 'selected' : ''}>ID Only</option>
+                          </select>
+                      </div>
+                      
+                      <div class="search-group">
+                          <label for="genre">Filter by Genre</label>
+                          <select id="genre" name="genre" class="search-select">
+                              <option value="">All Genres</option>
+                              ${allGenres.map((g: string) => `<option value="${g}" ${genre === g ? 'selected' : ''}>${g}</option>`).join('')}
+                          </select>
+                      </div>
+                      
+                      <div class="search-group">
+                          <label for="sortBy">Sort By</label>
+                          <select id="sortBy" name="sortBy" class="search-select">
+                              <option value="">Default (Author, Title)</option>
+                              <option value="id" ${sortBy === 'id' ? 'selected' : ''}>ID (Chronological)</option>
+                              <option value="title" ${sortBy === 'title' ? 'selected' : ''}>Title (Alphabetical)</option>
+                              <option value="author" ${sortBy === 'author' ? 'selected' : ''}>Author (Alphabetical)</option>
+                              <option value="genre" ${sortBy === 'genre' ? 'selected' : ''}>Genre</option>
+                              <option value="publicationYear" ${sortBy === 'publicationYear' ? 'selected' : ''}>Publication Year</option>
+                          </select>
+                      </div>
+                      
+                      <div class="search-group">
+                          <label for="sortOrder">Order</label>
+                          <select id="sortOrder" name="sortOrder" class="search-select">
+                              <option value="asc" ${sortOrder !== 'desc' ? 'selected' : ''}>Ascending (A-Z, 1-9)</option>
+                              <option value="desc" ${sortOrder === 'desc' ? 'selected' : ''}>Descending (Z-A, 9-1)</option>
+                          </select>
+                      </div>
+                      
+                      <button type="submit" class="search-btn">🔍 Search</button>
+                      <a href="/table" class="clear-btn">🔄 Clear</a>
+                  </form>
+                  
+                  ${searchMessage ? `<div class="search-message">📊 ${searchMessage}• Found ${books.length} result(s)</div>` : ''}
+              </div>
+              
+              <div class="book-count">
+                  ${searchMessage ? `Showing ${books.length} filtered results` : `Total books: ${books.length}`}
+              </div>
+              <a href="/add-book" class="add-book-btn">➕ Add New Book</a>
+              `;
 
-            books.forEach((book: any) => {
+            if (books.length === 0) {
                 html += `
-                      <tr>
-                          <td>${book.ID}</td>
-                          <td>${book.Author}</td>
-                          <td>${book.Title}</td>
-                          <td>${book.ISBN || ''}</td>
-                          <td>${book.Genre || ''}</td>
-                          <td>${book.PublicationYear || ''}</td>
-                          <td title="${book.Description || ''}">${book.Description ? (book.Description.length > 50 ? book.Description.substring(0, 50) + '...' : book.Description) : ''}</td>
-                          <td><a href="/edit/${book.ID}" class="edit-btn">Edit</a></td>
-                      </tr>
-        `;
-            });
+                  <div class="no-results">
+                      <h3>📭 No books found</h3>
+                      <p>Try adjusting your search criteria or <a href="/table">clear all filters</a>.</p>
+                  </div>
+                `;
+            } else {
+                html += `
+                  <table>
+                      <thead>
+                          <tr>
+                              <th>ID</th>
+                              <th>Author</th>
+                              <th>Title</th>
+                              <th>ISBN</th>
+                              <th>Genre</th>
+                              <th>Publication Year</th>
+                              <th>Description</th>
+                              <th>Actions</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                `;
+
+                books.forEach((book: any) => {
+                    html += `
+                          <tr>
+                              <td>${book.ID}</td>
+                              <td>${book.Author}</td>
+                              <td>${book.Title}</td>
+                              <td>${book.ISBN || ''}</td>
+                              <td>${book.Genre || ''}</td>
+                              <td>${book.PublicationYear || ''}</td>
+                              <td title="${book.Description || ''}">${book.Description ? (book.Description.length > 50 ? book.Description.substring(0, 50) + '...' : book.Description) : ''}</td>
+                              <td><a href="/edit/${book.ID}" class="edit-btn">Edit</a></td>
+                          </tr>
+                    `;
+                });
+
+                html += `
+                      </tbody>
+                  </table>
+                `;
+            }
 
             html += `
-                  </tbody>
-              </table>
           </div>
       </body>
       </html>
