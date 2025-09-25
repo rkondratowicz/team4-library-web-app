@@ -45,6 +45,8 @@
                 <option value="genre" <%=sortBy==='genre' ? 'selected' : '' %>>Genre</option>
                 <option value="publicationYear" <%=sortBy==='publicationYear' ? 'selected' : '' %>>Publication Year
                 </option>
+                <option value="availability" <%=sortBy==='availability' ? 'selected' : '' %>>Availability (Available
+                    First)</option>
             </select>
         </div>
 
@@ -79,6 +81,9 @@
             <th>ISBN</th>
             <th>Genre</th>
             <th>Publication Year</th>
+            <th>Total Copies</th>
+            <th>Available</th>
+            <th>Borrowed</th>
             <th>Description</th>
             <th>Actions</th>
         </tr>
@@ -104,11 +109,38 @@
                 <td>
                     <%= book.PublicationYear || '' %>
                 </td>
+                <td class="copy-info">
+                    <span class="copy-count">
+                        <%= book.totalCopies || 0 %>
+                    </span>
+                </td>
+                <td class="copy-info available">
+                    <span class="copy-count available">
+                        <%= book.availableCopies || 0 %>
+                    </span>
+                </td>
+                <td class="copy-info borrowed">
+                    <span class="copy-count borrowed">
+                        <%= book.borrowedCopies || 0 %>
+                    </span>
+                </td>
                 <td title="<%= book.Description || '' %>">
                     <%= book.Description ? (book.Description.length> 50 ? book.Description.substring(0, 50) + '...' :
                         book.Description) : '' %>
                 </td>
-                <td><a href="/edit/<%= book.ID %>" class="edit-btn" onclick="event.stopPropagation()">Edit</a></td>
+                <td class="actions-cell">
+                    <div class="action-buttons">
+                        <a href="/edit/<%= book.ID %>" class="edit-btn" onclick="event.stopPropagation()">Edit</a>
+                        <% if (book.availableCopies> 0) { %>
+                            <button class="borrow-btn" onclick="showBorrowForm('<%= book.ID %>', event)">📤
+                                Borrow</button>
+                            <% } %>
+                                <% if (book.borrowedCopies> 0) { %>
+                                    <button class="return-btn" onclick="showReturnForm('<%= book.ID %>', event)">📥
+                                        Return</button>
+                                    <% } %>
+                    </div>
+                </td>
             </tr>
             <% }); %>
     </tbody>
@@ -120,6 +152,60 @@
         <p>Try adjusting your search criteria or <a href="/table">clear all filters</a>.</p>
     </div>
     <% } %>
+
+        <!-- Borrow Modal -->
+        <div id="borrowModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">📤 Borrow Book</span>
+                    <span class="close" onclick="closeBorrowModal()">&times;</span>
+                </div>
+                <form id="borrowForm">
+                    <div class="form-group">
+                        <label class="form-label" for="borrowerName">Borrower Name:</label>
+                        <input type="text" id="borrowerName" name="borrowerName" class="form-input"
+                            placeholder="Enter borrower's full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="borrowerEmail">Borrower Email (Optional):</label>
+                        <input type="email" id="borrowerEmail" name="borrowerEmail" class="form-input"
+                            placeholder="Enter borrower's email">
+                    </div>
+                    <input type="hidden" id="borrowBookId" name="bookId">
+                    <div class="modal-buttons">
+                        <button type="button" class="modal-btn secondary" onclick="closeBorrowModal()">Cancel</button>
+                        <button type="submit" class="modal-btn primary">📤 Borrow Book</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Return Modal -->
+        <div id="returnModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">📥 Return Book</span>
+                    <span class="close" onclick="closeReturnModal()">&times;</span>
+                </div>
+                <form id="returnForm">
+                    <div class="form-group">
+                        <label class="form-label" for="returnerName">Returner Name:</label>
+                        <input type="text" id="returnerName" name="returnerName" class="form-input"
+                            placeholder="Enter name of person returning the book" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="returnNotes">Notes (Optional):</label>
+                        <input type="text" id="returnNotes" name="returnNotes" class="form-input"
+                            placeholder="Any notes about the return condition">
+                    </div>
+                    <input type="hidden" id="returnBookId" name="bookId">
+                    <div class="modal-buttons">
+                        <button type="button" class="modal-btn secondary" onclick="closeReturnModal()">Cancel</button>
+                        <button type="submit" class="modal-btn primary">📥 Return Book</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <style>
             body {
@@ -362,11 +448,291 @@
             .no-results a:hover {
                 text-decoration: underline;
             }
+
+            /* Copy Information Styles */
+            .copy-info {
+                text-align: center;
+                font-weight: bold;
+            }
+
+            .copy-count {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.9em;
+                min-width: 20px;
+            }
+
+            .copy-count.available {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+
+            .copy-count.borrowed {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+
+            /* Action Buttons */
+            .actions-cell {
+                min-width: 200px;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .borrow-btn,
+            .return-btn {
+                padding: 4px 8px;
+                border: none;
+                border-radius: 4px;
+                font-size: 0.8em;
+                cursor: pointer;
+                transition: all 0.3s;
+                white-space: nowrap;
+            }
+
+            .borrow-btn {
+                background-color: #28a745;
+                color: white;
+            }
+
+            .borrow-btn:hover {
+                background-color: #218838;
+            }
+
+            .return-btn {
+                background-color: #ffc107;
+                color: #212529;
+            }
+
+            .return-btn:hover {
+                background-color: #e0a800;
+            }
+
+            /* Modal Styles for Borrow/Return Forms */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+            }
+
+            .modal-content {
+                background-color: white;
+                margin: 15% auto;
+                padding: 20px;
+                border-radius: 8px;
+                width: 80%;
+                max-width: 400px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .modal-title {
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .close {
+                color: #aaa;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .close:hover {
+                color: #000;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                color: #333;
+            }
+
+            .form-input {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ced4da;
+                border-radius: 4px;
+                font-size: 14px;
+                box-sizing: border-box;
+            }
+
+            .form-input:focus {
+                outline: none;
+                border-color: #007bff;
+                box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
+            }
+
+            .modal-buttons {
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+            }
+
+            .modal-btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .modal-btn.primary {
+                background-color: #007bff;
+                color: white;
+            }
+
+            .modal-btn.primary:hover {
+                background-color: #0056b3;
+            }
+
+            .modal-btn.secondary {
+                background-color: #6c757d;
+                color: white;
+            }
+
+            .modal-btn.secondary:hover {
+                background-color: #5a6268;
+            }
         </style>
 
         <script>
             function viewBookDetails(bookId) {
-                window.location.href = '/book/' + encodeURIComponent(bookId);
+                // Temporarily disabled - navigate to edit instead
+                window.location.href = '/edit/' + encodeURIComponent(bookId);
+            }
+
+            // Borrow Modal Functions
+            function showBorrowForm(bookId, event) {
+                event.stopPropagation();
+                document.getElementById('borrowBookId').value = bookId;
+                document.getElementById('borrowModal').style.display = 'block';
+                document.getElementById('borrowerName').focus();
+            }
+
+            function closeBorrowModal() {
+                document.getElementById('borrowModal').style.display = 'none';
+                document.getElementById('borrowForm').reset();
+            }
+
+            // Return Modal Functions
+            function showReturnForm(bookId, event) {
+                event.stopPropagation();
+                document.getElementById('returnBookId').value = bookId;
+                document.getElementById('returnModal').style.display = 'block';
+                document.getElementById('returnerName').focus();
+            }
+
+            function closeReturnModal() {
+                document.getElementById('returnModal').style.display = 'none';
+                document.getElementById('returnForm').reset();
+            }
+
+            // Form Submission Handlers
+            document.getElementById('borrowForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const bookId = formData.get('bookId');
+                const borrowerName = formData.get('borrowerName');
+                const borrowerEmail = formData.get('borrowerEmail');
+
+                fetch('/api/books/' + bookId + '/borrow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        borrowerName: borrowerName,
+                        borrowerEmail: borrowerEmail
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Book borrowed successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.message || 'Failed to borrow book'));
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error: ' + error.message);
+                    });
+
+                closeBorrowModal();
+            });
+
+            document.getElementById('returnForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const bookId = formData.get('bookId');
+                const returnerName = formData.get('returnerName');
+                const returnNotes = formData.get('returnNotes');
+
+                fetch('/api/books/' + bookId + '/return', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        returnerName: returnerName,
+                        returnNotes: returnNotes
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Book returned successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.message || 'Failed to return book'));
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error: ' + error.message);
+                    });
+
+                closeReturnModal();
+            });
+
+            // Close modals when clicking outside
+            window.onclick = function (event) {
+                const borrowModal = document.getElementById('borrowModal');
+                const returnModal = document.getElementById('returnModal');
+                if (event.target == borrowModal) {
+                    closeBorrowModal();
+                }
+                if (event.target == returnModal) {
+                    closeReturnModal();
+                }
             }
 
             // Add visual feedback for clickable rows
@@ -378,5 +744,4 @@
                     });
                 });
             });
-            // Prevent row click when clicking on the Edit button
         </script>

@@ -277,6 +277,70 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Find an available copy for a book
+   * @param bookId Book ID
+   * @returns Promise<any | null> Available copy if found, null otherwise
+   */
+  async findAvailableCopy(bookId: string): Promise<any | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT * FROM copies WHERE BookID = ? AND Status = "Available" LIMIT 1',
+        [bookId],
+        (err, row) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(row || null);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Find a borrowed copy for a book
+   * @param bookId Book ID
+   * @returns Promise<any | null> Borrowed copy if found, null otherwise
+   */
+  async findBorrowedCopy(bookId: string): Promise<any | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT * FROM copies WHERE BookID = ? AND Status = "Borrowed" LIMIT 1',
+        [bookId],
+        (err, row) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(row || null);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Update copy status
+   * @param copyId Copy ID
+   * @param status New status ('Available' or 'Borrowed')
+   * @returns Promise<boolean> True if updated successfully, false otherwise
+   */
+  async updateCopyStatus(copyId: string, status: 'Available' | 'Borrowed'): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'UPDATE copies SET Status = ?, UpdatedAt = CURRENT_TIMESTAMP WHERE CopyID = ?',
+        [status, copyId],
+        function (err) {
+          if (err) {
+            reject(new Error(`Database update failed: ${err.message}`));
+          } else {
+            resolve(this.changes > 0);
+          }
+        }
+      );
+    });
+  }
+
+  /**
    * Map sort criteria to database column names
    * @private
    */
