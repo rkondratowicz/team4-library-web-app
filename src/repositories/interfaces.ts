@@ -40,6 +40,16 @@ export interface IBookRepository {
    * Get all unique genres in the database
    */
   getAllGenres(): Promise<string[]>;
+
+  /**
+   * Find all copies for a specific book
+   */
+  findCopiesByBookId(bookId: string): Promise<any[]>;
+
+  /**
+   * Get book details with copy statistics
+   */
+  findBookWithCopyStats(bookId: string): Promise<any>;
 }
 
 /**

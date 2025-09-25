@@ -228,6 +228,55 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Find all copies for a specific book
+   * @param bookId Book ID
+   * @returns Promise<any[]> Array of copies for the book
+   */
+  async findCopiesByBookId(bookId: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID', 
+        [bookId], 
+        (err, rows) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(rows || []);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Get book details with copy statistics
+   * @param bookId Book ID
+   * @returns Promise<any> Book with copy statistics
+   */
+  async findBookWithCopyStats(bookId: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          b.*,
+          COALESCE(cs.TotalCopies, 0) as TotalCopies,
+          COALESCE(cs.AvailableCopies, 0) as AvailableCopies,
+          COALESCE(cs.BorrowedCopies, 0) as BorrowedCopies
+        FROM books b
+        LEFT JOIN copy_statistics_view cs ON b.ID = cs.BookID
+        WHERE b.ID = ?
+      `;
+      
+      this.db.get(query, [bookId], (err, row) => {
+        if (err) {
+          reject(new Error(`Database query failed: ${err.message}`));
+        } else {
+          resolve(row || null);
+        }
+      });
+    });
+  }
+
+  /**
    * Map sort criteria to database column names
    * @private
    */

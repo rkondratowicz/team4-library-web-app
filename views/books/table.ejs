@@ -1,0 +1,144 @@
+<a href="/" class="back-link">← Back to Main Menu</a>
+<h1>📚 Library Books Database</h1>
+<div class="book-count">Total books: <%= books.length %></div>
+<a href="/add-book" class="add-book-btn">➕ Add New Book</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Author</th>
+            <th>Title</th>
+            <th>ISBN</th>
+            <th>Genre</th>
+            <th>Publication Year</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% books.forEach(function(book) { %>
+        <tr class="book-row" data-book-id="<%= book.ID %>" onclick="viewBookDetails('<%= book.ID %>')">
+            <td><%= book.ID %></td>
+            <td><%= book.Author %></td>
+            <td><%= book.Title %></td>
+            <td><%= book.ISBN || '' %></td>
+            <td><%= book.Genre || '' %></td>
+            <td><%= book.PublicationYear || '' %></td>
+            <td title="<%= book.Description || '' %>"><%= book.Description ? (book.Description.length > 50 ? book.Description.substring(0, 50) + '...' : book.Description) : '' %></td>
+            <td><a href="/edit/<%= book.ID %>" class="edit-btn" onclick="event.stopPropagation()">Edit</a></td>
+        </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f5f5f5;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+    border-top: 2px solid #007bff;
+}
+tr:hover {
+    background-color: #f8f9fa;
+}
+.book-row {
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.book-row:hover {
+    background-color: #e3f2fd !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.edit-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 6px 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+.add-book-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+.add-book-btn:hover {
+    background-color: #1e7e34;
+}
+.book-count {
+    margin-bottom: 10px;
+    color: #666;
+    font-style: italic;
+}
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #007bff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+.back-link:hover {
+    background-color: #007bff;
+    color: white;
+}
+</style>
+
+<script>
+function viewBookDetails(bookId) {
+    window.location.href = '/book/' + encodeURIComponent(bookId);
+}
+
+// Add visual feedback for clickable rows
+document.addEventListener('DOMContentLoaded', function() {
+    const bookRows = document.querySelectorAll('.book-row');
+    bookRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.cursor = 'pointer';
+        });
+    });
+});
+</script>

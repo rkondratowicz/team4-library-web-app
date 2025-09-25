@@ -1,0 +1,156 @@
+<h1>📝 Edit Book</h1>
+
+<form action="/edit/<%= book.ID %>" method="POST">
+    <div class="form-group">
+        <label>Book ID:</label>
+        <div class="book-id"><%= book.ID %></div>
+    </div>
+    
+    <div class="form-group">
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="Author" value="<%= book.Author %>" required maxlength="255">
+    </div>
+    
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="Title" value="<%= book.Title %>" required maxlength="500">
+    </div>
+    
+    <div class="form-group">
+        <label for="isbn">ISBN:</label>
+        <input type="text" id="isbn" name="ISBN" value="<%= book.ISBN || '' %>" maxlength="20" placeholder="e.g., 978-0-452-28423-4">
+    </div>
+    
+    <div class="form-group">
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" name="Genre" value="<%= book.Genre || '' %>" maxlength="100" placeholder="e.g., Fiction, Mystery, Romance">
+    </div>
+    
+    <div class="form-group">
+        <label for="publicationYear">Publication Year:</label>
+        <input type="number" id="publicationYear" name="PublicationYear" value="<%= book.PublicationYear || '' %>" min="1000" max="2030" placeholder="e.g., 1949">
+    </div>
+    
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="Description" maxlength="1000" rows="4" placeholder="Enter book description..."><%= book.Description || '' %></textarea>
+    </div>
+    
+    <div class="button-group">
+        <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete('<%= book.ID %>', '<%= book.Title.replace(/'/g, "\\'") %>')">🗑️ Delete Book</button>
+        <a href="/table" class="btn btn-secondary">❌ Cancel</a>
+    </div>
+</form>
+
+<style>
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+}
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s;
+}
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+.book-id {
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #6c757d;
+}
+</style>
+
+<script>
+function confirmDelete(bookId, bookTitle) {
+    if (confirm('Are you sure you want to delete "' + bookTitle + '"?\\n\\nThis action cannot be undone.')) {
+        deleteBook(bookId);
+    }
+}
+
+function deleteBook(bookId) {
+    fetch('/api/books/' + bookId, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and redirect
+            alert('Book deleted successfully!');
+            window.location.href = '/table';
+        } else {
+            // Show error message
+            alert('Error deleting book: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the book. Please try again.');
+    });
+}
+</script>
