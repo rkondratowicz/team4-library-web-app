@@ -28,6 +28,13 @@ export function createBookRoutes(bookController: BookController): Router {
   // GET /api/books - Get all books
   router.get('/', bookController.getAllBooks);
 
+  // Copy management routes (must come before :id route to avoid conflicts)
+  // GET /api/books/:id/copies - Get copies for a specific book
+  router.get('/:id/copies', bookController.getCopiesForBook);
+
+  // POST /api/books/:id/copies - Create new copy for a book
+  router.post('/:id/copies', bookController.createCopyForBook);
+
   // GET /api/books/:id - Get book by ID
   router.get('/:id', bookController.getBookById);
 

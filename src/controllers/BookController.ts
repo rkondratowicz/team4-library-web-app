@@ -221,4 +221,32 @@ export class BookController extends BaseController {
       this.error(res, error, 400);
     }
   };
+
+  /**
+   * Get all copies for a specific book
+   * GET /api/books/:id/copies
+   */
+  getCopiesForBook = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const copies = await this.bookService.getCopiesForBook(id);
+      this.success(res, copies, `Found ${copies.length} copies for book`);
+    } catch (error) {
+      this.error(res, error);
+    }
+  };
+
+  /**
+   * Create a new copy for a book
+   * POST /api/books/:id/copies
+   */
+  createCopyForBook = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const copyId = await this.bookService.createCopyForBook(id);
+      this.success(res, { copyId }, 'Copy created successfully');
+    } catch (error) {
+      this.error(res, error, 400);
+    }
+  };
 }
