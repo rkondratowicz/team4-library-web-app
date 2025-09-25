@@ -48,7 +48,7 @@ Each feature will be implemented as a complete vertical slice through all archit
 
 **Tasks:**
 1. Extend Book model with complete fields (ISBN, Genre, PublicationYear, Description)
-2. Create Copy model with CopyID, BookID, Status (Loaned, Available)
+2. Create Copy model with CopyID, BookID, Status (Available/Loaned)
 3. Define TypeScript interfaces for book and copy operations
 4. Create input/output types for API operations
 5. Add validation types and constraints
@@ -77,7 +77,7 @@ Each feature will be implemented as a complete vertical slice through all archit
 
 **Tasks:**
 1. Implement copy CRUD operations
-2. Add copy status management (Available, Borrowed, Damaged, Lost)
+2. Add copy status management (Available: true or false)
 3. Implement copy search and filtering
 4. Add copy availability queries
 5. Create copy history tracking
