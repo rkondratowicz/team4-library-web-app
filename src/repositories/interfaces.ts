@@ -61,6 +61,21 @@ export interface IBookRepository {
    * Get book details with copy statistics
    */
   findBookWithCopyStats(bookId: string): Promise<any>;
+
+  /**
+   * Find an available copy for a book
+   */
+  findAvailableCopy(bookId: string): Promise<any | null>;
+
+  /**
+   * Find a borrowed copy for a book
+   */
+  findBorrowedCopy(bookId: string): Promise<any | null>;
+
+  /**
+   * Update copy status
+   */
+  updateCopyStatus(copyId: string, status: 'Available' | 'Borrowed'): Promise<boolean>;
 }
 
 /**

@@ -359,6 +359,28 @@ export class BookService {
   }
 
   /**
+   * Get book copy statistics
+   * @param id Book ID
+   * @returns Promise<any> Copy statistics for the book
+   */
+  async getBookCopyStats(id: string): Promise<any> {
+    if (!id || typeof id !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    try {
+      const stats = await this.bookRepository.findBookWithCopyStats(id);
+      return {
+        totalCopies: stats?.TotalCopies || 0,
+        availableCopies: stats?.AvailableCopies || 0,
+        borrowedCopies: stats?.BorrowedCopies || 0
+      };
+    } catch (error) {
+      throw new Error(`Failed to retrieve copy statistics for book ID ${id}: ${error}`);
+    }
+  }
+
+  /**
    * Get book details with copies information
    * @param id Book ID
    * @returns Promise<any | null> Book with copies and statistics
@@ -387,6 +409,114 @@ export class BookService {
       };
     } catch (error) {
       throw new Error(`Failed to retrieve book details with copies for ID ${id}: ${error}`);
+    }
+  }
+
+  /**
+   * Borrow a book copy
+   * @param bookId Book ID
+   * @param borrowerInfo Borrower information
+   * @returns Promise<any> Result of borrow operation
+   */
+  async borrowBook(bookId: string, borrowerInfo: { borrowerName: string; borrowerEmail?: string }): Promise<any> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    if (!borrowerInfo.borrowerName || typeof borrowerInfo.borrowerName !== 'string') {
+      throw new Error('Borrower name is required and must be a string');
+    }
+
+    try {
+      // Check if book exists
+      const book = await this.bookRepository.findById(bookId);
+      if (!book) {
+        return {
+          success: false,
+          message: 'Book not found'
+        };
+      }
+
+      // Find an available copy
+      const availableCopy = await this.bookRepository.findAvailableCopy(bookId);
+      if (!availableCopy) {
+        return {
+          success: false,
+          message: 'No available copies for this book'
+        };
+      }
+
+      // Update copy status to Borrowed
+      const success = await this.bookRepository.updateCopyStatus(availableCopy.CopyID, 'Borrowed');
+      if (!success) {
+        return {
+          success: false,
+          message: 'Failed to update copy status'
+        };
+      }
+
+      // Log the borrowing transaction (simplified - just update the copy)
+      return {
+        success: true,
+        copyId: availableCopy.CopyID,
+        message: `Book "${book.Title}" borrowed successfully`
+      };
+    } catch (error) {
+      throw new Error(`Failed to borrow book: ${error}`);
+    }
+  }
+
+  /**
+   * Return a book copy
+   * @param bookId Book ID
+   * @param returnInfo Return information
+   * @returns Promise<any> Result of return operation
+   */
+  async returnBook(bookId: string, returnInfo: { returnerName: string; returnNotes?: string }): Promise<any> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    if (!returnInfo.returnerName || typeof returnInfo.returnerName !== 'string') {
+      throw new Error('Returner name is required and must be a string');
+    }
+
+    try {
+      // Check if book exists
+      const book = await this.bookRepository.findById(bookId);
+      if (!book) {
+        return {
+          success: false,
+          message: 'Book not found'
+        };
+      }
+
+      // Find a borrowed copy
+      const borrowedCopy = await this.bookRepository.findBorrowedCopy(bookId);
+      if (!borrowedCopy) {
+        return {
+          success: false,
+          message: 'No borrowed copies found for this book'
+        };
+      }
+
+      // Update copy status to Available
+      const success = await this.bookRepository.updateCopyStatus(borrowedCopy.CopyID, 'Available');
+      if (!success) {
+        return {
+          success: false,
+          message: 'Failed to update copy status'
+        };
+      }
+
+      // Log the return transaction (simplified - just update the copy)
+      return {
+        success: true,
+        copyId: borrowedCopy.CopyID,
+        message: `Book "${book.Title}" returned successfully`
+      };
+    } catch (error) {
+      throw new Error(`Failed to return book: ${error}`);
     }
   }
 
