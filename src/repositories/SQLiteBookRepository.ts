@@ -61,8 +61,8 @@ export class SQLiteBookRepository implements IBookRepository {
   async create(book: Book): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db.run(
-        'INSERT INTO books (ID, Author, Title) VALUES (?, ?, ?)',
-        [book.ID, book.Author, book.Title],
+        'INSERT INTO books (ID, Author, Title, ISBN, Genre, PublicationYear, Description, CreatedAt, UpdatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+        [book.ID, book.Author, book.Title, book.ISBN, book.Genre, book.PublicationYear, book.Description],
         function (err) {
           if (err) {
             if (err.message.includes('UNIQUE constraint failed')) {
@@ -97,8 +97,27 @@ export class SQLiteBookRepository implements IBookRepository {
         fields.push('Title = ?');
         values.push(updateData.Title);
       }
+      if (updateData.ISBN !== undefined) {
+        fields.push('ISBN = ?');
+        values.push(updateData.ISBN);
+      }
+      if (updateData.Genre !== undefined) {
+        fields.push('Genre = ?');
+        values.push(updateData.Genre);
+      }
+      if (updateData.PublicationYear !== undefined) {
+        fields.push('PublicationYear = ?');
+        values.push(updateData.PublicationYear);
+      }
+      if (updateData.Description !== undefined) {
+        fields.push('Description = ?');
+        values.push(updateData.Description);
+      }
 
-      if (fields.length === 0) {
+      // Always update the UpdatedAt timestamp
+      fields.push('UpdatedAt = CURRENT_TIMESTAMP');
+
+      if (fields.length === 1) { // Only UpdatedAt field
         resolve(false);
         return;
       }
