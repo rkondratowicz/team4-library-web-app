@@ -282,6 +282,38 @@ export class BookService {
   }
 
   /**
+   * Get book details with copies information
+   * @param id Book ID
+   * @returns Promise<any | null> Book with copies and statistics
+   */
+  async getBookWithCopies(id: string): Promise<any | null> {
+    if (!id || typeof id !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    try {
+      // Get book with copy statistics
+      const bookWithStats = await this.bookRepository.findBookWithCopyStats(id);
+      if (!bookWithStats) {
+        return null;
+      }
+
+      // Get individual copies
+      const copies = await this.bookRepository.findCopiesByBookId(id);
+
+      return {
+        ...this.transformBookData(bookWithStats),
+        totalCopies: bookWithStats.TotalCopies || 0,
+        availableCopies: bookWithStats.AvailableCopies || 0,
+        borrowedCopies: bookWithStats.BorrowedCopies || 0,
+        copies: copies
+      };
+    } catch (error) {
+      throw new Error(`Failed to retrieve book details with copies for ID ${id}: ${error}`);
+    }
+  }
+
+  /**
    * Transform book data from repository format to business format
    * @private
    */
