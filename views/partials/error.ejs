@@ -1,0 +1,32 @@
+<h1>❌ <%= title %></h1>
+<% if (description) { %>
+<p><%= description %></p>
+<% } %>
+<% if (error) { %>
+<div class="error-message">
+    <strong><%= error %></strong>
+</div>
+<% } %>
+<% if (backUrl) { %>
+<a href="<%= backUrl %>" class="back-link">← <%= backText || 'Back' %></a>
+<% } %>
+
+<style>
+h1 {
+    text-align: center;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 20px 0;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+}
+.container {
+    text-align: center;
+}
+</style>

@@ -1,4 +1,6 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { Container } from './container/Container.js';
 import { createBookRoutes, createMainRoutes } from './routes/index.js';
 import { ConsoleUtils } from './utils/ConsoleUtils.js';
@@ -15,12 +17,20 @@ import { BookService } from './services/BookService.js';
  * The app.ts file serves as the application bootstrap and dependency wiring.
  */
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const port: number = 3000;
 const container = new Container();
 
-// Middleware to parse JSON bodies
+// Set up EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+
+// Middleware to parse JSON and form data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /**
  * Initialize the application with proper dependency injection
