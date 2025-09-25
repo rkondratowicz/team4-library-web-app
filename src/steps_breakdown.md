@@ -33,7 +33,7 @@ Each feature will be implemented as a complete vertical slice through all archit
 - `src/services/MigrationService.ts`
 
 **Tasks:**
-1. Extend books table with ISBN, Genre, PublicationYear, Description, CreatedAt, UpdatedAt
+1. Extend books table with ISBN, Genre, PublicationYear, Description, 
 2. Create copies table for multiple physical book copies
 3. Implement migration system for schema updates
 4. Add database constraints and indexes for book-related tables
@@ -48,7 +48,7 @@ Each feature will be implemented as a complete vertical slice through all archit
 
 **Tasks:**
 1. Extend Book model with complete fields (ISBN, Genre, PublicationYear, Description)
-2. Create Copy model with CopyID, BookID, Status
+2. Create Copy model with CopyID, BookID, Status (Available/Loaned)
 3. Define TypeScript interfaces for book and copy operations
 4. Create input/output types for API operations
 5. Add validation types and constraints
