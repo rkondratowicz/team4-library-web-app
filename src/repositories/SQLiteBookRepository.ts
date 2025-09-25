@@ -98,6 +98,22 @@ export class SQLiteBookRepository implements IBookRepository {
         fields.push('Title = ?');
         values.push(updateData.Title);
       }
+      if (updateData.ISBN !== undefined) {
+        fields.push('ISBN = ?');
+        values.push(updateData.ISBN);
+      }
+      if (updateData.Genre !== undefined) {
+        fields.push('Genre = ?');
+        values.push(updateData.Genre);
+      }
+      if (updateData.PublicationYear !== undefined) {
+        fields.push('PublicationYear = ?');
+        values.push(updateData.PublicationYear);
+      }
+      if (updateData.Description !== undefined) {
+        fields.push('Description = ?');
+        values.push(updateData.Description);
+      }
 
       if (fields.length === 0) {
         resolve(false);

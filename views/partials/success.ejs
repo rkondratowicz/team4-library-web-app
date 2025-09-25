@@ -2,22 +2,22 @@
 <div class="success-message">
     <%= message %>
 </div>
-<% if (details) { %>
+<% if (typeof details !== 'undefined' && details) { %>
 <div class="book-details">
     <% Object.keys(details).forEach(function(key) { %>
         <p><strong><%= key %>:</strong> <%= details[key] %></p>
     <% }); %>
 </div>
 <% } %>
-<% if (additionalLinks && additionalLinks.length > 0) { %>
+<% if (typeof additionalLinks !== 'undefined' && additionalLinks && additionalLinks.length > 0) { %>
     <% additionalLinks.forEach(function(link) { %>
         <a href="<%= link.url %>" class="<%= link.class || 'btn' %>"><%= link.text %></a>
     <% }); %>
 <% } %>
-<% if (backUrl) { %>
+<% if (typeof backUrl !== 'undefined' && backUrl) { %>
 <a href="<%= backUrl %>" class="back-link">← <%= backText || 'Back' %></a>
 <% } %>
-<% if (autoRedirect) { %>
+<% if (typeof autoRedirect !== 'undefined' && autoRedirect) { %>
 <script>
 // Auto-redirect after <%= autoRedirect.delay || 3 %> seconds
 setTimeout(() => {
