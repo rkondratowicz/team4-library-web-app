@@ -235,8 +235,8 @@ export class SQLiteBookRepository implements IBookRepository {
   async findCopiesByBookId(bookId: string): Promise<any[]> {
     return new Promise((resolve, reject) => {
       this.db.all(
-        'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID', 
-        [bookId], 
+        'SELECT * FROM copies WHERE BookID = ? ORDER BY CopyID',
+        [bookId],
         (err, rows) => {
           if (err) {
             reject(new Error(`Database query failed: ${err.message}`));
@@ -265,7 +265,7 @@ export class SQLiteBookRepository implements IBookRepository {
         LEFT JOIN copy_statistics_view cs ON b.ID = cs.BookID
         WHERE b.ID = ?
       `;
-      
+
       this.db.get(query, [bookId], (err, row) => {
         if (err) {
           reject(new Error(`Database query failed: ${err.message}`));

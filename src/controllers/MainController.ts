@@ -83,8 +83,8 @@ export class MainController extends BaseController {
 
 
             // Use EJS template but pass search data
-            res.render('books/table', { 
-                books, 
+            res.render('books/table', {
+                books,
                 allGenres,
                 searchMessage,
                 search: search || '',
