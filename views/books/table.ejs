@@ -70,7 +70,10 @@
 <div class="book-count">
     <%= searchMessage ? `Showing ${books.length} filtered results` : `Total books: ${books.length}` %>
 </div>
-<a href="/add-book" class="add-book-btn">➕ Add New Book</a>
+<div class="action-buttons-top">
+    <a href="/add-book" class="add-book-btn">➕ Add New Book</a>
+    <a href="/analytics" class="analytics-btn">📊 Analytics</a>
+</div>
 
 <table>
     <thead>
@@ -131,14 +134,6 @@
                 <td class="actions-cell">
                     <div class="action-buttons">
                         <a href="/edit/<%= book.ID %>" class="edit-btn" onclick="event.stopPropagation()">Edit</a>
-                        <% if (book.availableCopies> 0) { %>
-                            <button class="borrow-btn" onclick="showBorrowForm('<%= book.ID %>', event)">📤
-                                Borrow</button>
-                            <% } %>
-                                <% if (book.borrowedCopies> 0) { %>
-                                    <button class="return-btn" onclick="showReturnForm('<%= book.ID %>', event)">📥
-                                        Return</button>
-                                    <% } %>
                     </div>
                 </td>
             </tr>
@@ -153,59 +148,7 @@
     </div>
     <% } %>
 
-        <!-- Borrow Modal -->
-        <div id="borrowModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title">📤 Borrow Book</span>
-                    <span class="close" onclick="closeBorrowModal()">&times;</span>
-                </div>
-                <form id="borrowForm">
-                    <div class="form-group">
-                        <label class="form-label" for="borrowerName">Borrower Name:</label>
-                        <input type="text" id="borrowerName" name="borrowerName" class="form-input"
-                            placeholder="Enter borrower's full name" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="borrowerEmail">Borrower Email (Optional):</label>
-                        <input type="email" id="borrowerEmail" name="borrowerEmail" class="form-input"
-                            placeholder="Enter borrower's email">
-                    </div>
-                    <input type="hidden" id="borrowBookId" name="bookId">
-                    <div class="modal-buttons">
-                        <button type="button" class="modal-btn secondary" onclick="closeBorrowModal()">Cancel</button>
-                        <button type="submit" class="modal-btn primary">📤 Borrow Book</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <!-- Return Modal -->
-        <div id="returnModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <span class="modal-title">📥 Return Book</span>
-                    <span class="close" onclick="closeReturnModal()">&times;</span>
-                </div>
-                <form id="returnForm">
-                    <div class="form-group">
-                        <label class="form-label" for="returnerName">Returner Name:</label>
-                        <input type="text" id="returnerName" name="returnerName" class="form-input"
-                            placeholder="Enter name of person returning the book" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="returnNotes">Notes (Optional):</label>
-                        <input type="text" id="returnNotes" name="returnNotes" class="form-input"
-                            placeholder="Any notes about the return condition">
-                    </div>
-                    <input type="hidden" id="returnBookId" name="bookId">
-                    <div class="modal-buttons">
-                        <button type="button" class="modal-btn secondary" onclick="closeReturnModal()">Cancel</button>
-                        <button type="submit" class="modal-btn primary">📥 Return Book</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
         <style>
             body {
@@ -386,6 +329,13 @@
                 background-color: #0056b3;
             }
 
+            .action-buttons-top {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
             .add-book-btn {
                 background-color: #28a745;
                 color: white;
@@ -396,11 +346,26 @@
                 font-weight: bold;
                 transition: background-color 0.3s;
                 display: inline-block;
-                margin-bottom: 20px;
             }
 
             .add-book-btn:hover {
                 background-color: #1e7e34;
+            }
+
+            .analytics-btn {
+                background-color: #6f42c1;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 4px;
+                font-size: 1em;
+                font-weight: bold;
+                transition: background-color 0.3s;
+                display: inline-block;
+            }
+
+            .analytics-btn:hover {
+                background-color: #5a32a3;
             }
 
             .book-count {
@@ -626,114 +591,11 @@
 
         <script>
             function viewBookDetails(bookId) {
-                // Temporarily disabled - navigate to edit instead
-                window.location.href = '/edit/' + encodeURIComponent(bookId);
+                // Navigate to book details view
+                window.location.href = '/book/' + encodeURIComponent(bookId);
             }
 
-            // Borrow Modal Functions
-            function showBorrowForm(bookId, event) {
-                event.stopPropagation();
-                document.getElementById('borrowBookId').value = bookId;
-                document.getElementById('borrowModal').style.display = 'block';
-                document.getElementById('borrowerName').focus();
-            }
 
-            function closeBorrowModal() {
-                document.getElementById('borrowModal').style.display = 'none';
-                document.getElementById('borrowForm').reset();
-            }
-
-            // Return Modal Functions
-            function showReturnForm(bookId, event) {
-                event.stopPropagation();
-                document.getElementById('returnBookId').value = bookId;
-                document.getElementById('returnModal').style.display = 'block';
-                document.getElementById('returnerName').focus();
-            }
-
-            function closeReturnModal() {
-                document.getElementById('returnModal').style.display = 'none';
-                document.getElementById('returnForm').reset();
-            }
-
-            // Form Submission Handlers
-            document.getElementById('borrowForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const bookId = formData.get('bookId');
-                const borrowerName = formData.get('borrowerName');
-                const borrowerEmail = formData.get('borrowerEmail');
-
-                fetch('/api/books/' + bookId + '/borrow', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        borrowerName: borrowerName,
-                        borrowerEmail: borrowerEmail
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Book borrowed successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Failed to borrow book'));
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error: ' + error.message);
-                    });
-
-                closeBorrowModal();
-            });
-
-            document.getElementById('returnForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const bookId = formData.get('bookId');
-                const returnerName = formData.get('returnerName');
-                const returnNotes = formData.get('returnNotes');
-
-                fetch('/api/books/' + bookId + '/return', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        returnerName: returnerName,
-                        returnNotes: returnNotes
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Book returned successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.message || 'Failed to return book'));
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error: ' + error.message);
-                    });
-
-                closeReturnModal();
-            });
-
-            // Close modals when clicking outside
-            window.onclick = function (event) {
-                const borrowModal = document.getElementById('borrowModal');
-                const returnModal = document.getElementById('returnModal');
-                if (event.target == borrowModal) {
-                    closeBorrowModal();
-                }
-                if (event.target == returnModal) {
-                    closeReturnModal();
-                }
-            }
 
             // Add visual feedback for clickable rows
             document.addEventListener('DOMContentLoaded', function () {

@@ -98,6 +98,22 @@ export class SQLiteBookRepository implements IBookRepository {
         fields.push('Title = ?');
         values.push(updateData.Title);
       }
+      if (updateData.ISBN !== undefined) {
+        fields.push('ISBN = ?');
+        values.push(updateData.ISBN);
+      }
+      if (updateData.Genre !== undefined) {
+        fields.push('Genre = ?');
+        values.push(updateData.Genre);
+      }
+      if (updateData.PublicationYear !== undefined) {
+        fields.push('PublicationYear = ?');
+        values.push(updateData.PublicationYear);
+      }
+      if (updateData.Description !== undefined) {
+        fields.push('Description = ?');
+        values.push(updateData.Description);
+      }
 
       if (fields.length === 0) {
         resolve(false);
@@ -246,6 +262,33 @@ export class SQLiteBookRepository implements IBookRepository {
           }
         }
       );
+    });
+  }
+
+  /**
+   * Find all books with copy statistics
+   * @returns Promise<any[]> Array of books with copy statistics
+   */
+  async findAllWithCopyStats(): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          b.*,
+          COALESCE(cs.TotalCopies, 0) as TotalCopies,
+          COALESCE(cs.AvailableCopies, 0) as AvailableCopies,
+          COALESCE(cs.BorrowedCopies, 0) as BorrowedCopies
+        FROM books b
+        LEFT JOIN copy_statistics_view cs ON b.ID = cs.BookID
+        ORDER BY b.Author, b.Title
+      `;
+
+      this.db.all(query, [], (err, rows) => {
+        if (err) {
+          reject(new Error(`Database query failed: ${err.message}`));
+        } else {
+          resolve(rows || []);
+        }
+      });
     });
   }
 

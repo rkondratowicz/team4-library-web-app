@@ -3,7 +3,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Container } from './container/Container.js';
-import { createBookRoutes, createMainRoutes, createAuthRoutes, createMemberRoutes, createMemberDashboardRoutes } from './routes/index.js';
+import { createBookRoutes, createMainRoutes, createAuthRoutes, createMemberRoutes, createMemberDashboardRoutes, createAnalyticsRoutes, createAnalyticsApiRoutes } from './routes/index.js';
 import { ConsoleUtils } from './utils/ConsoleUtils.js';
 import { BookService } from './services/BookService.js';
 
@@ -74,6 +74,7 @@ function setupRoutes(): void {
     const bookController = container.getBookController();
     const mainController = container.getMainController();
     const authController = container.getAuthController();
+    const analyticsController = container.getAnalyticsController();
 
     // Setup authentication routes
     app.use('/auth', createAuthRoutes(authController));
@@ -90,8 +91,14 @@ function setupRoutes(): void {
     // Setup member dashboard routes (members and admins)
     app.use('/member', createMemberDashboardRoutes(container));
 
+    // Setup analytics routes
+    app.use('/analytics', createAnalyticsRoutes(analyticsController));
+
     // Setup API routes for books
     app.use('/api/books', createBookRoutes(bookController));
+
+    // Setup API routes for analytics
+    app.use('/api/analytics', createAnalyticsApiRoutes(analyticsController));
 
     // 404 handler for API routes
     app.use('/api', (req, res, next) => {

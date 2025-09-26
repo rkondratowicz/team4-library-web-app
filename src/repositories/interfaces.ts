@@ -64,6 +64,11 @@ export interface IBookRepository {
   findBookWithCopyStats(bookId: string): Promise<any>;
 
   /**
+   * Find all books with copy statistics
+   */
+  findAllWithCopyStats(): Promise<any[]>;
+
+  /**
    * Find an available copy for a book
    */
   findAvailableCopy(bookId: string): Promise<any | null>;
