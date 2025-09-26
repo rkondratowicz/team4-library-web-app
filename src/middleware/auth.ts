@@ -35,8 +35,19 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction): vo
         req.isAuthenticated = true;
         next();
     } else {
-        // Redirect to login page
-        res.redirect('/login');
+        // Check if this is an AJAX request
+        const isAjaxRequest = req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+                             req.headers['accept']?.includes('application/json');
+        
+        if (isAjaxRequest) {
+            res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        } else {
+            // Redirect to login page for regular requests
+            res.redirect('/login');
+        }
     }
 };
 
@@ -48,12 +59,23 @@ export const requireAdmin = (req: Request, res: Response, next: NextFunction): v
     if (req.member && req.member.Role === 'admin') {
         next();
     } else {
-        res.status(403).render('partials/error', {
-            title: 'Access Denied',
-            description: 'You do not have permission to access this area. Admin access required.',
-            backUrl: req.member?.Role === 'member' ? '/member/dashboard' : '/login',
-            backText: req.member?.Role === 'member' ? 'Back to Dashboard' : 'Login'
-        });
+        // Check if this is an AJAX request
+        const isAjaxRequest = req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+                             req.headers['accept']?.includes('application/json');
+        
+        if (isAjaxRequest) {
+            res.status(403).json({
+                success: false,
+                message: 'Admin access required'
+            });
+        } else {
+            res.status(403).render('partials/error', {
+                title: 'Access Denied',
+                description: 'You do not have permission to access this area. Admin access required.',
+                backUrl: req.member?.Role === 'member' ? '/member/dashboard' : '/login',
+                backText: req.member?.Role === 'member' ? 'Back to Dashboard' : 'Login'
+            });
+        }
     }
 };
 

@@ -188,8 +188,14 @@ export class SQLiteMemberRepository implements MemberRepository {
             const result = await this.dbRun(sql, [id]);
 
             return result.changes > 0;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deleting member:', error);
+            
+            // Handle foreign key constraint errors
+            if (error.message && error.message.includes('FOREIGN KEY constraint failed')) {
+                throw new Error('Cannot delete member: member has active borrowings or associated records');
+            }
+            
             throw new Error('Failed to delete member');
         }
     }
