@@ -217,6 +217,36 @@
             margin-bottom: 20px;
         }
 
+        .availability-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .availability-available {
+            background: rgba(46, 204, 113, 0.15);
+            color: #27ae60;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .availability-unavailable {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .availability-limited {
+            background: rgba(241, 196, 15, 0.15);
+            color: #f39c12;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
         .book-actions {
             display: flex;
             gap: 10px;
@@ -393,13 +423,13 @@
                     <% if (search) { %>
                         <p>📊 Found <strong>
                                 <%= totalBooks %>
-                            </strong> books matching "<%= search %>"</p>
+                            </strong> books matching "<%= search %>" • Available books shown first</p>
                         <% } else { %>
                             <p>📊 Showing <strong>
                                     <%= books.length %>
                                 </strong> of <strong>
                                     <%= totalBooks %>
-                                </strong> books</p>
+                                </strong> books • Available books shown first</p>
                             <% } %>
                 </div>
 
@@ -413,6 +443,25 @@
                                 </div>
                                 <div class="book-author">by <%= book.Author %>
                                 </div>
+
+                                <!-- Availability Indicator -->
+                                <% if (book.availableCopies !== undefined) { %>
+                                    <% if (book.availableCopies > 0) { %>
+                                        <% if (book.availableCopies >= 3) { %>
+                                            <div class="availability-indicator availability-available">
+                                                ✅ Available (<%= book.availableCopies %> copies)
+                                            </div>
+                                        <% } else { %>
+                                            <div class="availability-indicator availability-limited">
+                                                ⚠️ Limited availability (<%= book.availableCopies %> <%= book.availableCopies === 1 ? 'copy' : 'copies' %>)
+                                            </div>
+                                        <% } %>
+                                    <% } else { %>
+                                        <div class="availability-indicator availability-unavailable">
+                                            ❌ Currently unavailable
+                                        </div>
+                                    <% } %>
+                                <% } %>
 
                                 <% if (book.Genre || book.PublicationYear) { %>
                                     <div class="book-details">

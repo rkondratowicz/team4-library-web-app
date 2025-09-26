@@ -50,7 +50,7 @@ export class MemberDashboardController {
 
     /**
      * GET /member/books
-     * Browse books interface for members - simplified view
+     * Browse books interface for members - simplified view with availability indicators
      */
     getMemberBooks = async (req: Request, res: Response): Promise<void> => {
         try {
@@ -68,15 +68,34 @@ export class MemberDashboardController {
             let totalBooks;
 
             if (search) {
-                // Search functionality
+                // Search functionality - get books with stats for availability
                 const searchResults = await this.bookService.searchBooksSimple(search);
-                books = searchResults.slice((page - 1) * limit, page * limit);
-                totalBooks = searchResults.length;
+                // For search results, get the stats for each book
+                const booksWithStats = await Promise.all(
+                    searchResults.map(async (book) => {
+                        const stats = await this.bookService.getBookCopyStats(book.ID);
+                        return { ...book, ...stats };
+                    })
+                );
+                // Sort to show available books first
+                booksWithStats.sort((a, b) => {
+                    if (a.availableCopies > 0 && b.availableCopies === 0) return -1;
+                    if (a.availableCopies === 0 && b.availableCopies > 0) return 1;
+                    return 0;
+                });
+                books = booksWithStats.slice((page - 1) * limit, page * limit);
+                totalBooks = booksWithStats.length;
             } else {
-                // Get all books with pagination
-                const allBooks = await this.bookService.getAllBooks();
-                books = allBooks.slice((page - 1) * limit, page * limit);
-                totalBooks = allBooks.length;
+                // Get all books with copy statistics
+                const allBooksWithStats = await this.bookService.getAllBooksWithStats();
+                // Sort to show available books first
+                allBooksWithStats.sort((a, b) => {
+                    if (a.availableCopies > 0 && b.availableCopies === 0) return -1;
+                    if (a.availableCopies === 0 && b.availableCopies > 0) return 1;
+                    return 0;
+                });
+                books = allBooksWithStats.slice((page - 1) * limit, page * limit);
+                totalBooks = allBooksWithStats.length;
             }
 
             const totalPages = Math.ceil(totalBooks / limit);
