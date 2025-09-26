@@ -70,11 +70,19 @@ export class AuthController extends BaseController {
                 UpdatedAt: member.UpdatedAt
             };
 
-            // Redirect based on role
-            if (member.Role === 'admin') {
-                res.redirect('/?message=Welcome back, ' + member.Name);
+            // Check for returnTo URL or redirect based on role
+            const returnTo = req.session.returnTo;
+            if (returnTo) {
+                // Clear the returnTo URL and redirect to intended destination
+                delete req.session.returnTo;
+                res.redirect(returnTo + (returnTo.includes('?') ? '&' : '?') + 'message=Welcome back, ' + encodeURIComponent(member.Name));
             } else {
-                res.redirect('/member/dashboard?message=Welcome back, ' + member.Name);
+                // Default role-based redirect
+                if (member.Role === 'admin') {
+                    res.redirect('/?message=Welcome back, ' + encodeURIComponent(member.Name));
+                } else {
+                    res.redirect('/member/dashboard?message=Welcome back, ' + encodeURIComponent(member.Name));
+                }
             }
 
         } catch (error) {

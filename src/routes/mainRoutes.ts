@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { MainController } from '../controllers/MainController.js';
 import { optionalAuth } from '../middleware/auth.js';
+import { adminOnly } from '../middleware/adminAuth.js';
 import express from 'express';
 
 /**
@@ -15,28 +16,29 @@ export function createMainRoutes(mainController: MainController): Router {
   router.use(express.json());
 
   // GET / - Main menu page with authentication flow
-  router.get('/', mainController.getMainMenu);
+  router.get('/', optionalAuth, mainController.getMainMenu);
 
-  // GET /table - Books table view
-  router.get('/table', mainController.getBooksTable);
+  // Admin-only routes - require admin authentication
+  // GET /table - Books table view (Admin only)
+  router.get('/table', adminOnly, mainController.getBooksTable);
 
-  // GET /book/:id - Book details view
-  router.get('/book/:id', mainController.getBookDetails);
+  // GET /book/:id - Book details view (Admin only)
+  router.get('/book/:id', adminOnly, mainController.getBookDetails);
 
-  // GET /add-book - Add new book form
-  router.get('/add-book', mainController.getAddBookForm);
+  // GET /add-book - Add new book form (Admin only)
+  router.get('/add-book', adminOnly, mainController.getAddBookForm);
 
-  // POST /add-book - Create new book from form
-  router.post('/add-book', mainController.createBookFromForm);
+  // POST /add-book - Create new book from form (Admin only)
+  router.post('/add-book', adminOnly, mainController.createBookFromForm);
 
-  // GET /edit/:id - Edit book form
-  router.get('/edit/:id', mainController.getEditBookForm);
+  // GET /edit/:id - Edit book form (Admin only)
+  router.get('/edit/:id', adminOnly, mainController.getEditBookForm);
 
-  // POST /edit/:id - Update book from form
-  router.post('/edit/:id', mainController.updateBookFromForm);
+  // POST /edit/:id - Update book from form (Admin only)  
+  router.post('/edit/:id', adminOnly, mainController.updateBookFromForm);
 
-  // POST /api/books/:id/borrow - Borrow a book
-  router.post('/api/books/:id/borrow', async (req, res) => {
+  // POST /api/books/:id/borrow - Borrow a book (Admin only)
+  router.post('/api/books/:id/borrow', adminOnly, async (req, res) => {
     try {
       const { id } = req.params;
       const { borrowerName, borrowerEmail } = req.body;
@@ -60,8 +62,8 @@ export function createMainRoutes(mainController: MainController): Router {
     }
   });
 
-  // POST /api/books/:id/return - Return a book
-  router.post('/api/books/:id/return', async (req, res) => {
+  // POST /api/books/:id/return - Return a book (Admin only)
+  router.post('/api/books/:id/return', adminOnly, async (req, res) => {
     try {
       const { id } = req.params;
       const { returnerName, returnNotes } = req.body;

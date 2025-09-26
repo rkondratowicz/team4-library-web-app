@@ -203,21 +203,56 @@ The system maintains a clean separation using the existing `borrowings` table wh
 ---
 
 ### **Step 8: Implement Role-Based Access Control**
-**Status:** Not Started  
+**Status:** ✅ Completed  
 **Priority:** High  
 **Dependencies:** Step 1
 
 #### Tasks:
-- [ ] Create middleware to protect admin routes
-- [ ] Add role-based redirects
-- [ ] Ensure members can only access member features
-- [ ] Add unauthorized access handling
+- [x] Create middleware to protect admin routes
+- [x] Add role-based redirects
+- [x] Ensure members can only access member features
+- [x] Add unauthorized access handling
 
-#### Files to Create/Modify:
-- `src/middleware/adminAuth.ts` - Admin-only middleware
-- `src/middleware/memberAuth.ts` - Member authentication middleware
-- Update all admin routes with protection
-- Update `src/routes/index.ts` - Role-based routing
+#### Implementation Details:
+Comprehensive role-based access control system has been implemented with dedicated middleware and proper route protection.
+
+**Key Features Implemented:**
+- **Admin-Only Route Protection**: All admin features (book table, add/edit books, book details) now require admin authentication
+- **Dedicated Middleware Files**: Created separate `adminAuth.ts` and `memberAuth.ts` for clear separation of concerns
+- **Return-To Functionality**: Users are redirected to their intended destination after login
+- **Comprehensive Error Handling**: Proper 403 error pages with role-appropriate navigation
+- **Flexible Access Control**: Multiple middleware options for different access scenarios
+
+#### Files Created/Modified:
+- **NEW** `src/middleware/adminAuth.ts` - Admin-only middleware with multiple protection levels
+- **NEW** `src/middleware/memberAuth.ts` - Member authentication middleware with flexible options
+- **Updated** `src/routes/mainRoutes.ts` - Applied admin protection to all admin routes
+- **Updated** `src/controllers/AuthController.ts` - Added returnTo redirect functionality
+- **Enhanced** existing middleware in `src/middleware/auth.ts` continues to work alongside new middleware
+
+#### Security Implementation:
+```typescript
+// Admin Routes Protection
+router.get('/table', adminOnly, mainController.getBooksTable);
+router.get('/add-book', adminOnly, mainController.getAddBookForm);
+router.get('/edit/:id', adminOnly, mainController.getEditBookForm);
+
+// Member Routes Protection (already implemented)
+router.use('/member', requireAuth, requireMember);
+router.use('/members', requireAuth, requireAdmin);
+```
+
+#### Access Control Matrix:
+- **Public Access**: Login, register pages
+- **Admin Only**: Book table, add/edit books, member management, analytics
+- **Member + Admin**: Member dashboard, book browsing, borrowing functionality
+- **API Protection**: All admin API endpoints protected
+
+#### User Experience:
+- **Seamless Redirects**: Users directed to intended pages after login
+- **Role-Appropriate Dashboards**: Admins → main menu, Members → member dashboard
+- **Clear Error Messages**: Helpful feedback for unauthorized access attempts
+- **Session Management**: Proper session handling with returnTo functionality
 
 ---
 
@@ -230,7 +265,7 @@ The system maintains a clean separation using the existing `borrowings` table wh
 - [ ] Build self-registration process
 - [ ] Add email validation
 - [ ] Implement password requirements
-- [ ] Create admin approval system (optional)
+
 
 #### Files to Create/Modify:
 - Update `views/auth/register.ejs` - Enhanced registration form
