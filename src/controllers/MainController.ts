@@ -16,25 +16,49 @@ export class MainController extends BaseController {
     }
 
     /**
-     * Render the main menu page
+     * Render the main menu page with authentication flow
      * GET /
      */
     getMainMenu = async (req: Request, res: Response): Promise<void> => {
         try {
-            const bookCount = await this.bookService.getBookCount();
-            res.render('main-menu', {
-                bookCount,
-                member: req.session?.member || null,
-                message: req.query.message || null
-            });
+            // Check if user is authenticated
+            if (!req.session?.member) {
+                // User is not logged in, redirect to login page
+                res.redirect('/login');
+                return;
+            }
+
+            const member = req.session.member;
+            
+            // Route based on user role
+            if (member.Role === 'admin') {
+                // Admin - show admin homepage (current main menu)
+                const bookCount = await this.bookService.getBookCount();
+                res.render('main-menu', {
+                    bookCount,
+                    member: member,
+                    message: req.query.message || null
+                });
+            } else if (member.Role === 'member') {
+                // Regular member - redirect to member dashboard
+                res.redirect('/member/dashboard');
+            } else {
+                // Unknown role - redirect to login
+                req.session.destroy((err) => {
+                    if (err) {
+                        console.error('Error destroying session:', err);
+                    }
+                    res.redirect('/login');
+                });
+            }
         } catch (error) {
             console.error('Error loading main menu:', error);
             res.status(500).render('partials/error', {
                 title: 'Error',
                 description: 'Failed to load the main menu',
                 error: error,
-                backUrl: '/',
-                backText: 'Try Again'
+                backUrl: '/login',
+                backText: 'Login'
             });
         }
     };
