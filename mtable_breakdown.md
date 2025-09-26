@@ -142,20 +142,30 @@ CREATE TABLE members (
 ---
 
 ### **Step 6: Build Member Borrowed Books Dashboard**
-**Status:** Not Started  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Dependencies:** Steps 1, 2, 5
 
 #### Tasks:
-- [ ] Create borrowed books view for members
-- [ ] Add due date tracking
-- [ ] Implement one-click return functionality
-- [ ] Show borrowing history
+- [x] Create borrowed books view for members
+- [x] Add due date tracking
+- [x] Implement one-click return functionality
+- [x] Show borrowing history
 
-#### Files to Create/Modify:
-- `views/member/borrowed-books.ejs` - Borrowed books dashboard
-- Update `src/controllers/MemberDashboardController.ts` - Borrowed books logic
-- Update `src/services/BookService.ts` - Member return functionality
+#### Files Created/Modified:
+- `views/member/borrowed-books.ejs` - Complete borrowed books dashboard with modern UI
+- Updated `src/controllers/MemberDashboardController.ts` - Full borrowed books logic with error handling
+- Updated `src/services/BookService.ts` - Member return functionality and borrowing management
+
+#### Implementation Details:
+- **Borrowed Books View**: Beautiful card-based layout showing all member's current borrowings
+- **Due Date Tracking**: Real-time calculation of due dates, days remaining, and overdue status
+- **Return Functionality**: One-click return with confirmation dialog and success/error feedback
+- **Borrowing History**: Detailed view of book information, borrow dates, and due dates
+- **Overdue Handling**: Visual indicators and warnings for overdue books
+- **Responsive Design**: Mobile-friendly interface with modern styling
+- **Error Handling**: Comprehensive error messages and user feedback
+- **Navigation Integration**: Seamless integration with member dashboard and navigation
 
 ---
 
