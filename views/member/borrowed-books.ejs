@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .member-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #e0e0e0;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .member-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .nav-link.logout {
+            background: #e74c3c;
+        }
+
+        .nav-link.logout:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h2 {
+            color: white;
+            font-size: 2.2em;
+            margin: 0 0 10px 0;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 5em;
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+
+        .empty-title {
+            font-size: 2em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .empty-description {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .empty-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .coming-soon {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .coming-soon h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .coming-soon p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            text-align: left;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .feature-list li {
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .alert-success {
+            background-color: rgba(212, 237, 218, 0.9);
+            color: #155724;
+            border: 1px solid rgba(195, 230, 203, 0.9);
+        }
+
+        .alert-error {
+            background-color: rgba(248, 215, 218, 0.9);
+            color: #721c24;
+            border: 1px solid rgba(245, 198, 203, 0.9);
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .book-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .book-card.overdue {
+            border: 2px solid #e74c3c;
+            background: rgba(255, 245, 245, 0.95);
+        }
+
+        .book-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .book-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            color: #7f8c8d;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .borrowing-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .overdue-text {
+            color: #e74c3c !important;
+            font-weight: 700;
+        }
+
+        .overdue-banner {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+
+            .empty-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="member-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <span style="font-size: 2em;">📚</span>
+                <h1>Library Portal</h1>
+                <span>•</span>
+                <a href="/member/dashboard" class="back-link">← Dashboard</a>
+            </div>
+            <div class="member-nav">
+                <a href="/member/dashboard" class="nav-link">Dashboard</a>
+                <a href="/member/books" class="nav-link">Browse Books</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>📖 My Borrowed Books</h2>
+            <p>Manage your current and past book loans</p>
+        </div>
+
+        <% if (message) { %>
+            <div class="alert alert-success">
+                <%= message %>
+            </div>
+            <% } %>
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert alert-error">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <% if (borrowedBooks && borrowedBooks.length> 0) { %>
+                            <div class="books-grid">
+                                <% borrowedBooks.forEach(borrowing=> { %>
+                                    <div class="book-card <%= borrowing.IsOverdue ? 'overdue' : '' %>">
+                                        <div class="book-icon">📚</div>
+                                        <div class="book-title">
+                                            <%= borrowing.Title %>
+                                        </div>
+                                        <div class="book-author">by <%= borrowing.Author %>
+                                        </div>
+
+                                        <div class="borrowing-info">
+                                            <div class="info-item">
+                                                <span class="info-label">Borrowed:</span>
+                                                <span class="info-value">
+                                                    <%= new Date(borrowing.BorrowDate).toLocaleDateString() %>
+                                                </span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Due:</span>
+                                                <span
+                                                    class="info-value <%= borrowing.IsOverdue ? 'overdue-text' : '' %>">
+                                                    <%= new Date(borrowing.DueDate).toLocaleDateString() %>
+                                                </span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Days Remaining:</span>
+                                                <span
+                                                    class="info-value <%= borrowing.DaysRemaining < 0 ? 'overdue-text' : '' %>">
+                                                    <%= Math.ceil(borrowing.DaysRemaining) %> days
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="book-actions">
+                                            <form method="POST" action="/member/return/<%= borrowing.BorrowingID %>"
+                                                style="display: inline;">
+                                                <button type="submit" class="btn btn-primary"
+                                                    onclick="return confirm('Are you sure you want to return &quot;<%= borrowing.Title %>&quot;?')">
+                                                    📤 Return Book
+                                                </button>
+                                            </form>
+                                            <a href="/member/books/<%= borrowing.BookID %>" class="btn btn-secondary">
+                                                👁️ View Details
+                                            </a>
+                                        </div>
+
+                                        <% if (borrowing.IsOverdue) { %>
+                                            <div class="overdue-banner">
+                                                ⚠️ OVERDUE - Please return as soon as possible
+                                            </div>
+                                            <% } %>
+                                    </div>
+                                    <% }); %>
+                            </div>
+                            <% } else { %>
+                                <div class="empty-state">
+                                    <div class="empty-icon">📚</div>
+                                    <div class="empty-title">No Books Currently Borrowed</div>
+                                    <div class="empty-description">
+                                        You haven't borrowed any books yet. Explore our collection and find something
+                                        interesting to read!
+                                    </div>
+
+                                    <div class="empty-actions">
+                                        <a href="/member/books" class="btn btn-primary">
+                                            🔍 Browse Books
+                                        </a>
+                                        <a href="/member/dashboard" class="btn btn-secondary">
+                                            🏠 Back to Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                                <% } %>
+    </div>
+</body>
+
+</html>

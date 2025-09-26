@@ -609,6 +609,178 @@ export class BookService {
   }
 
   /**
+   * Borrow a book for a member
+   * @param bookId Book ID
+   * @param memberId Member ID
+   * @returns Promise<any> Result of borrow operation
+   */
+  async borrowBookForMember(bookId: string, memberId: string): Promise<any> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    if (!memberId || typeof memberId !== 'string') {
+      throw new Error('Member ID must be a valid string');
+    }
+
+    try {
+      // Check if book exists
+      const book = await this.bookRepository.findById(bookId);
+      if (!book) {
+        return {
+          success: false,
+          message: 'Book not found'
+        };
+      }
+
+      // Check member's borrowing limit (3 books max)
+      const activeBorrowingsCount = await this.bookRepository.getMemberActiveBorrowingsCount(memberId);
+      if (activeBorrowingsCount >= 3) {
+        return {
+          success: false,
+          message: 'You have reached the maximum borrowing limit of 3 books'
+        };
+      }
+
+      // Check if book is available
+      const isAvailable = await this.bookRepository.isBookAvailable(bookId);
+      if (!isAvailable) {
+        return {
+          success: false,
+          message: 'No available copies for this book'
+        };
+      }
+
+      // Find an available copy
+      const availableCopy = await this.bookRepository.findAvailableCopy(bookId);
+      if (!availableCopy) {
+        return {
+          success: false,
+          message: 'No available copies found'
+        };
+      }
+
+      // Update copy status to Borrowed
+      const copyUpdateSuccess = await this.bookRepository.updateCopyStatus(availableCopy.CopyID, 'Borrowed');
+      if (!copyUpdateSuccess) {
+        return {
+          success: false,
+          message: 'Failed to update copy status'
+        };
+      }
+
+      // Create borrowing record
+      const borrowingId = await this.bookRepository.createBorrowing(memberId, availableCopy.CopyID);
+
+      return {
+        success: true,
+        borrowingId,
+        copyId: availableCopy.CopyID,
+        message: `Book "${book.Title}" borrowed successfully`,
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
+      };
+    } catch (error) {
+      throw new Error(`Failed to borrow book: ${error}`);
+    }
+  }
+
+  /**
+   * Return a book for a member
+   * @param borrowingId Borrowing ID
+   * @returns Promise<any> Result of return operation
+   */
+  async returnBookForMember(borrowingId: string): Promise<any> {
+    if (!borrowingId || typeof borrowingId !== 'string') {
+      throw new Error('Borrowing ID must be a valid string');
+    }
+
+    try {
+      const success = await this.bookRepository.returnBook(borrowingId);
+      if (!success) {
+        return {
+          success: false,
+          message: 'Failed to return book. Please check if the borrowing record exists.'
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Book returned successfully'
+      };
+    } catch (error) {
+      throw new Error(`Failed to return book: ${error}`);
+    }
+  }
+
+  /**
+   * Get member's borrowed books
+   * @param memberId Member ID
+   * @returns Promise<any[]> Array of borrowed books with details
+   */
+  async getMemberBorrowedBooks(memberId: string): Promise<any[]> {
+    if (!memberId || typeof memberId !== 'string') {
+      throw new Error('Member ID must be a valid string');
+    }
+
+    try {
+      return await this.bookRepository.getMemberActiveBorrowings(memberId);
+    } catch (error) {
+      throw new Error(`Failed to retrieve member's borrowed books: ${error}`);
+    }
+  }
+
+  /**
+   * Get member's active borrowings count
+   * @param memberId Member ID
+   * @returns Promise<number> Number of active borrowings
+   */
+  async getMemberActiveBorrowingsCount(memberId: string): Promise<number> {
+    if (!memberId || typeof memberId !== 'string') {
+      throw new Error('Member ID must be a valid string');
+    }
+
+    try {
+      return await this.bookRepository.getMemberActiveBorrowingsCount(memberId);
+    } catch (error) {
+      throw new Error(`Failed to get member's borrowings count: ${error}`);
+    }
+  }
+
+  /**
+   * Check if a book is available for borrowing
+   * @param bookId Book ID
+   * @returns Promise<boolean> True if available
+   */
+  async isBookAvailableForBorrowing(bookId: string): Promise<boolean> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    try {
+      return await this.bookRepository.isBookAvailable(bookId);
+    } catch (error) {
+      throw new Error(`Failed to check book availability: ${error}`);
+    }
+  }
+
+  /**
+   * Get available copies count for a book
+   * @param bookId Book ID
+   * @returns Promise<number> Number of available copies
+   */
+  async getAvailableCopiesCount(bookId: string): Promise<number> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    try {
+      return await this.bookRepository.getAvailableCopiesCount(bookId);
+    } catch (error) {
+      throw new Error(`Failed to get available copies count: ${error}`);
+    }
+  }
+
+  /**
    * Validate search options
    * @private
    */

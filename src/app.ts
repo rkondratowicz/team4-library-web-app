@@ -1,8 +1,9 @@
 import express from 'express';
+import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Container } from './container/Container.js';
-import { createBookRoutes, createMainRoutes, createAnalyticsRoutes, createAnalyticsApiRoutes } from './routes/index.js';
+import { createBookRoutes, createMainRoutes, createAuthRoutes, createMemberRoutes, createMemberDashboardRoutes, createAnalyticsRoutes, createAnalyticsApiRoutes } from './routes/index.js';
 import { ConsoleUtils } from './utils/ConsoleUtils.js';
 import { BookService } from './services/BookService.js';
 
@@ -27,6 +28,18 @@ const container = new Container();
 // Set up EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
+
+// Session middleware (must be before routes)
+app.use(session({
+    secret: 'library-management-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
 
 // Middleware to parse JSON and form data
 app.use(express.json());
@@ -60,10 +73,23 @@ function setupRoutes(): void {
     // Get controllers from container
     const bookController = container.getBookController();
     const mainController = container.getMainController();
+    const authController = container.getAuthController();
     const analyticsController = container.getAnalyticsController();
+
+    // Setup authentication routes
+    app.use('/auth', createAuthRoutes(authController));
+
+    // Alternative auth routes for backward compatibility
+    app.use('/', createAuthRoutes(authController));
 
     // Setup main routes (home page, table view, database info)
     app.use('/', createMainRoutes(mainController));
+
+    // Setup member management routes (admin only)
+    app.use('/members', createMemberRoutes(container));
+
+    // Setup member dashboard routes (members and admins)
+    app.use('/member', createMemberDashboardRoutes(container));
 
     // Setup analytics routes
     app.use('/analytics', createAnalyticsRoutes(analyticsController));

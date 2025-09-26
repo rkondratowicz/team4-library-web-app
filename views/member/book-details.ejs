@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .member-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #e0e0e0;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .back-link {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .member-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .nav-link.logout {
+            background: #e74c3c;
+        }
+
+        .nav-link.logout:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .book-detail-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .book-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .book-icon {
+            font-size: 4em;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        .book-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            font-size: 1.3em;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .availability-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .available {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .book-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .book-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #3498db;
+        }
+
+        .info-section h3 {
+            margin: 0 0 20px 0;
+            color: #2c3e50;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .borrowing-section {
+            background: #e8f4fd;
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .borrowing-section.unavailable {
+            background: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+
+        .borrowing-section.limit-reached {
+            background: #fab1a0;
+            border-color: #e17055;
+        }
+
+        .borrowing-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .borrowing-description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .borrowing-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #3498db;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-disabled {
+            background: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .btn-disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .alert-success {
+            background-color: rgba(212, 237, 218, 0.9);
+            color: #155724;
+            border: 1px solid rgba(195, 230, 203, 0.9);
+        }
+
+        .alert-error {
+            background-color: rgba(248, 215, 218, 0.9);
+            color: #721c24;
+            border: 1px solid rgba(245, 198, 203, 0.9);
+        }
+
+        .back-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-section a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .back-section a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="member-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <span style="font-size: 2em;">📚</span>
+                <h1>Library Portal</h1>
+                <span>•</span>
+                <a href="/member/books" class="back-link">← Browse Books</a>
+            </div>
+            <div class="member-nav">
+                <a href="/member/dashboard" class="nav-link">Dashboard</a>
+                <a href="/member/books" class="nav-link">Browse Books</a>
+                <a href="/member/borrowed" class="nav-link">My Books</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <% if (message) { %>
+            <div class="alert alert-success">
+                <%= message %>
+            </div>
+            <% } %>
+                <% if (typeof error !=='undefined' && error) { %>
+                    <div class="alert alert-error">
+                        <%= error %>
+                    </div>
+                    <% } %>
+
+                        <div class="book-detail-card">
+                            <div class="book-header">
+                                <div class="book-icon">📖</div>
+                                <div class="book-title">
+                                    <%= book.Title %>
+                                </div>
+                                <div class="book-author">by <%= book.Author %>
+                                </div>
+                                <div class="availability-badge <%= isAvailable ? 'available' : 'unavailable' %>">
+                                    <%= isAvailable ? '✅ Available' : '❌ Not Available' %>
+                                </div>
+                            </div>
+
+                            <div class="book-info">
+                                <div class="info-section">
+                                    <h3>📚 Book Information</h3>
+                                    <div class="info-item">
+                                        <span class="info-label">Title:</span>
+                                        <span class="info-value">
+                                            <%= book.Title %>
+                                        </span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Author:</span>
+                                        <span class="info-value">
+                                            <%= book.Author %>
+                                        </span>
+                                    </div>
+                                    <% if (book.Genre) { %>
+                                        <div class="info-item">
+                                            <span class="info-label">Genre:</span>
+                                            <span class="info-value">
+                                                <%= book.Genre %>
+                                            </span>
+                                        </div>
+                                        <% } %>
+                                            <% if (book.PublicationYear) { %>
+                                                <div class="info-item">
+                                                    <span class="info-label">Published:</span>
+                                                    <span class="info-value">
+                                                        <%= book.PublicationYear %>
+                                                    </span>
+                                                </div>
+                                                <% } %>
+                                                    <% if (book.ISBN) { %>
+                                                        <div class="info-item">
+                                                            <span class="info-label">ISBN:</span>
+                                                            <span class="info-value">
+                                                                <%= book.ISBN %>
+                                                            </span>
+                                                        </div>
+                                                        <% } %>
+                                </div>
+
+                                <div class="info-section">
+                                    <h3>👤 Your Borrowing Status</h3>
+                                    <div class="info-item">
+                                        <span class="info-label">Books Borrowed:</span>
+                                        <span class="info-value">
+                                            <%= memberBorrowedCount %> of <%= borrowingLimit %>
+                                        </span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Available Slots:</span>
+                                        <span class="info-value">
+                                            <%= borrowingLimit - memberBorrowedCount %>
+                                        </span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Available Copies:</span>
+                                        <span class="info-value">
+                                            <%= availableCopies || 0 %> copies
+                                        </span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">This Book:</span>
+                                        <span class="info-value">
+                                            <%= isAvailable ? 'Available to borrow' : 'Currently borrowed' %>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (canBorrow) { %>
+                                <div class="borrowing-section">
+                                    <div class="borrowing-title">📖 Ready to Borrow</div>
+                                    <div class="borrowing-description">
+                                        This book is available and you have borrowing slots remaining.
+                                        You can borrow books for up to 2 weeks with the option to renew.
+                                    </div>
+                                    <div class="borrowing-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-number">
+                                                <%= borrowingLimit - memberBorrowedCount %>
+                                            </div>
+                                            <div class="stat-label">Slots Available</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number">14</div>
+                                            <div class="stat-label">Days Loan Period</div>
+                                        </div>
+                                    </div>
+                                    <div class="actions">
+                                        <form method="POST" action="/member/borrow/<%= book.ID %>"
+                                            style="display: inline;">
+                                            <button type="submit" class="btn btn-primary"
+                                                onclick="return confirm('Are you sure you want to borrow &quot;<%= book.Title %>&quot;? This will count towards your 3-book limit.')">
+                                                📚 Borrow This Book
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <% } else if (!isAvailable) { %>
+                                    <div class="borrowing-section unavailable">
+                                        <div class="borrowing-title">📚 Currently Unavailable</div>
+                                        <div class="borrowing-description">
+                                            This book is currently borrowed by another member.
+                                            Check back later or explore other books in our collection.
+                                        </div>
+                                        <div class="actions">
+                                            <button class="btn btn-disabled">
+                                                ⏳ Book Not Available
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="borrowing-section limit-reached">
+                                            <div class="borrowing-title">📚 Borrowing Limit Reached</div>
+                                            <div class="borrowing-description">
+                                                You have borrowed the maximum number of books (<%= borrowingLimit %>).
+                                                    Please return a book before borrowing new ones.
+                                            </div>
+                                            <div class="actions">
+                                                <button class="btn btn-disabled">
+                                                    🚫 Borrowing Limit Reached
+                                                </button>
+                                                <a href="/member/borrowed" class="btn btn-secondary">
+                                                    📖 View My Borrowed Books
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <div class="actions">
+                                                <a href="/member/books" class="btn btn-secondary">
+                                                    ← Back to Browse
+                                                </a>
+                                                <a href="/member/dashboard" class="btn btn-secondary">
+                                                    🏠 Dashboard
+                                                </a>
+                                            </div>
+                        </div>
+
+                        <div class="back-section">
+                            <a href="/member/books">← Back to Book Catalog</a>
+                        </div>
+    </div>
+
+
+</body>
+
+</html>

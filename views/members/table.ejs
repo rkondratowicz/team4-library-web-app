@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .auth-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-form input {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .search-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 30px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .table th:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        }
+
+        .table th a {
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .role-badge.admin {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .role-badge.member {
+            background: #3498db;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .no-results .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .back-link {
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            background: #f8f9fa;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .sort-icon {
+            font-size: 0.8em;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-controls {
+                justify-content: center;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .table-container {
+                padding: 15px;
+            }
+
+            .table {
+                font-size: 14px;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <% if (member) { %>
+                <div class="auth-info">
+                    <div class="user-badge">
+                        👤 <%= member.Name %> (<%= member.Role %>)
+                    </div>
+                </div>
+                <% } %>
+
+                    <h1>👥 Member Management</h1>
+                    <p class="subtitle">Manage library members and their access</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-controls">
+                <form class="search-form" method="GET">
+                    <input type="text" name="search" placeholder="Search members by name or email..."
+                        value="<%= search %>">
+                    <button type="submit" class="btn btn-primary">🔍 Search</button>
+                    <% if (search) { %>
+                        <a href="/members" class="btn btn-secondary">Clear</a>
+                        <% } %>
+                </form>
+            </div>
+
+            <div>
+                <a href="/members/add" class="btn btn-success">➕ Add New Member</a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number">
+                        <%= stats.totalMembers %>
+                    </div>
+                    <div class="stat-label">Total Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        <%= stats.adminCount %>
+                    </div>
+                    <div class="stat-label">Administrators</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        <%= stats.memberCount %>
+                    </div>
+                    <div class="stat-label">Regular Members</div>
+                </div>
+            </div>
+
+            <% if (searchMessage) { %>
+                <div class="alert alert-info">
+                    <%= searchMessage %>
+                </div>
+                <% } %>
+
+                    <% if (members && members.length> 0) { %>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <a
+                                            href="?search=<%= search %>&sortBy=MemberID&sortOrder=<%= sortBy === 'MemberID' && sortOrder === 'asc' ? 'desc' : 'asc' %>">
+                                            ID
+                                            <% if (sortBy==='MemberID' ) { %>
+                                                <span class="sort-icon">
+                                                    <%= sortOrder==='asc' ? '↑' : '↓' %>
+                                                </span>
+                                                <% } %>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a
+                                            href="?search=<%= search %>&sortBy=Name&sortOrder=<%= sortBy === 'Name' && sortOrder === 'asc' ? 'desc' : 'asc' %>">
+                                            Name
+                                            <% if (sortBy==='Name' ) { %>
+                                                <span class="sort-icon">
+                                                    <%= sortOrder==='asc' ? '↑' : '↓' %>
+                                                </span>
+                                                <% } %>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a
+                                            href="?search=<%= search %>&sortBy=Email&sortOrder=<%= sortBy === 'Email' && sortOrder === 'asc' ? 'desc' : 'asc' %>">
+                                            Email
+                                            <% if (sortBy==='Email' ) { %>
+                                                <span class="sort-icon">
+                                                    <%= sortOrder==='asc' ? '↑' : '↓' %>
+                                                </span>
+                                                <% } %>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a
+                                            href="?search=<%= search %>&sortBy=Role&sortOrder=<%= sortBy === 'Role' && sortOrder === 'asc' ? 'desc' : 'asc' %>">
+                                            Role
+                                            <% if (sortBy==='Role' ) { %>
+                                                <span class="sort-icon">
+                                                    <%= sortOrder==='asc' ? '↑' : '↓' %>
+                                                </span>
+                                                <% } %>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a
+                                            href="?search=<%= search %>&sortBy=CreatedAt&sortOrder=<%= sortBy === 'CreatedAt' && sortOrder === 'asc' ? 'desc' : 'asc' %>">
+                                            Joined
+                                            <% if (sortBy==='CreatedAt' ) { %>
+                                                <span class="sort-icon">
+                                                    <%= sortOrder==='asc' ? '↑' : '↓' %>
+                                                </span>
+                                                <% } %>
+                                        </a>
+                                    </th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% members.forEach(memberItem=> { %>
+                                    <tr>
+                                        <td>#<%= memberItem.MemberID %>
+                                        </td>
+                                        <td><strong>
+                                                <%= memberItem.Name %>
+                                            </strong></td>
+                                        <td>
+                                            <%= memberItem.Email %>
+                                        </td>
+                                        <td>
+                                            <span class="role-badge <%= memberItem.Role %>">
+                                                <%= memberItem.Role %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <%= new Date(memberItem.CreatedAt).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <div class="actions">
+                                                <a href="/members/view/<%= memberItem.MemberID %>"
+                                                    class="btn btn-primary btn-sm" title="View Details">👁️</a>
+                                                <a href="/members/edit/<%= memberItem.MemberID %>"
+                                                    class="btn btn-secondary btn-sm" title="Edit Member">✏️</a>
+                                                <% if (member && member.MemberID !==memberItem.MemberID) { %>
+                                                    <button class="btn btn-danger btn-sm delete-member-btn"
+                                                        data-member-id="<%= memberItem.MemberID %>"
+                                                        data-member-name="<%= memberItem.Name %>"
+                                                        title="Delete Member">🗑️</button>
+                                                    <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                            </tbody>
+                        </table>
+                        <% } else { %>
+                            <div class="no-results">
+                                <div class="icon">👥</div>
+                                <h3>No Members Found</h3>
+                                <% if (search) { %>
+                                    <p>No members match your search criteria "<%= search %>"</p>
+                                    <a href="/members" class="btn btn-primary">View All Members</a>
+                                    <% } else { %>
+                                        <p>No members have been added to the system yet.</p>
+                                        <a href="/members/add" class="btn btn-success">Add First Member</a>
+                                        <% } %>
+                            </div>
+                            <% } %>
+        </div>
+
+        <div class="back-link">
+            <a href="/">← Back to Admin Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // Add event listeners for delete buttons
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.delete-member-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const memberId = this.dataset.memberId;
+                    const memberName = this.dataset.memberName;
+                    deleteMember(memberId, memberName);
+                });
+            });
+        });
+
+        async function deleteMember(memberId, memberName) {
+            if (!confirm(`Are you sure you want to delete member "${memberName}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/members/delete/${memberId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Member deleted successfully');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting member:', error);
+                alert('Failed to delete member. Please try again.');
+            }
+        }
+
+        // Show success/error messages from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+        const error = urlParams.get('error');
+
+        if (message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success';
+            alertDiv.innerHTML = message;
+            document.querySelector('.table-container').prepend(alertDiv);
+
+            // Clean URL
+            const url = new URL(window.location);
+            url.searchParams.delete('message');
+            window.history.replaceState({}, '', url);
+        }
+
+        if (error) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.innerHTML = error;
+            alertDiv.style.backgroundColor = '#f8d7da';
+            alertDiv.style.color = '#721c24';
+            alertDiv.style.borderColor = '#f5c6cb';
+            document.querySelector('.table-container').prepend(alertDiv);
+
+            // Clean URL
+            const url = new URL(window.location);
+            url.searchParams.delete('error');
+            window.history.replaceState({}, '', url);
+        }
+    </script>
+</body>
+
+</html>

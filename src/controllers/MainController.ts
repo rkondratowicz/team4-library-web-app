@@ -22,7 +22,11 @@ export class MainController extends BaseController {
     getMainMenu = async (req: Request, res: Response): Promise<void> => {
         try {
             const bookCount = await this.bookService.getBookCount();
-            res.render('main-menu', { bookCount });
+            res.render('main-menu', {
+                bookCount,
+                member: req.session?.member || null,
+                message: req.query.message || null
+            });
         } catch (error) {
             console.error('Error loading main menu:', error);
             res.status(500).render('partials/error', {
@@ -46,6 +50,10 @@ export class MainController extends BaseController {
 
             let books;
             let searchMessage = '';
+            let allGenres: string[] = [];
+
+            // Get all genres for the filter dropdown
+            allGenres = await this.bookService.getAllGenres();
 
             // If search parameters are provided, use search functionality
             if (search || sortBy || genre) {
@@ -75,14 +83,37 @@ export class MainController extends BaseController {
                 const searchResult = await this.bookService.searchBooks(searchOptions);
                 books = searchResult.books;
             } else {
-                books = await this.bookService.getAllBooksWithStats();
+                books = await this.bookService.getAllBooks();
             }
 
-            // Get all genres for the filter dropdown
-            const allGenres = await this.bookService.getAllGenres();
+            // Get books with copy statistics
+            const booksWithCopies = await Promise.all(books.map(async (book: any) => {
+                const copyStats = await this.bookService.getBookCopyStats(book.ID);
+                return {
+                    ...book,
+                    totalCopies: copyStats.totalCopies || 0,
+                    availableCopies: copyStats.availableCopies || 0,
+                    borrowedCopies: copyStats.borrowedCopies || 0
+                };
+            }));
 
+            // Handle availability sorting
+            if (sortBy === 'availability') {
+                booksWithCopies.sort((a: any, b: any) => {
+                    const aAvailable = a.availableCopies > 0;
+                    const bAvailable = b.availableCopies > 0;
 
-            // Use EJS template but pass search data
+                    if (sortOrder === 'desc') {
+                        return aAvailable === bAvailable ? 0 : aAvailable ? -1 : 1;
+                    } else {
+                        return aAvailable === bAvailable ? 0 : aAvailable ? -1 : 1;
+                    }
+                });
+            }
+
+            books = booksWithCopies;
+
+            // Render the table view with search functionality
             res.render('books/table', {
                 books,
                 allGenres,
@@ -101,6 +132,44 @@ export class MainController extends BaseController {
                 error: error,
                 backUrl: '/',
                 backText: 'Back to Main Menu'
+            });
+        }
+    };
+
+    /**
+     * Display book details with copies information
+     * GET /book/:id
+     */
+    getBookDetails = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const bookWithCopies = await this.bookService.getBookWithCopies(id);
+
+            if (!bookWithCopies) {
+                res.status(404).render('partials/error', {
+                    title: 'Book Not Found',
+                    description: `The book with ID "${id}" could not be found.`,
+                    backUrl: '/table',
+                    backText: 'Back to Books Table'
+                });
+                return;
+            }
+
+            res.render('books/details', {
+                book: bookWithCopies,
+                copies: bookWithCopies.copies,
+                totalCopies: bookWithCopies.totalCopies,
+                availableCopies: bookWithCopies.availableCopies,
+                borrowedCopies: bookWithCopies.borrowedCopies
+            });
+        } catch (error) {
+            console.error('Error fetching book details:', error);
+            res.status(500).render('partials/error', {
+                title: 'Error',
+                description: 'Failed to fetch book details from database',
+                error: error,
+                backUrl: '/table',
+                backText: 'Back to Books Table'
             });
         }
     };
@@ -147,19 +216,10 @@ export class MainController extends BaseController {
             const { Author, Title, ISBN, Genre, PublicationYear, Description } = req.body;
 
             const bookData: any = { Author, Title };
-            
-            // Always include ISBN, Genre, and Description (even if empty string)
-            bookData.ISBN = ISBN || '';
-            bookData.Genre = Genre || '';
-            bookData.Description = Description || '';
-            
-            // Handle PublicationYear - convert to number or null if empty/invalid
-            if (PublicationYear && PublicationYear.trim() !== '') {
-                const year = parseInt(PublicationYear);
-                bookData.PublicationYear = isNaN(year) ? null : year;
-            } else {
-                bookData.PublicationYear = null;
-            }
+            if (ISBN) bookData.ISBN = ISBN;
+            if (Genre) bookData.Genre = Genre;
+            if (PublicationYear) bookData.PublicationYear = parseInt(PublicationYear) || null;
+            if (Description) bookData.Description = Description;
 
             const updated = await this.bookService.updateBook(id, bookData);
 
@@ -177,11 +237,6 @@ export class MainController extends BaseController {
             res.render('partials/success', {
                 title: 'Book Updated Successfully!',
                 message: `The book "${Title}" by ${Author} has been updated successfully.`,
-                details: {
-                    'Book ID': id,
-                    'Title': Title,
-                    'Author': Author
-                },
                 backUrl: '/table',
                 backText: 'Back to Books Table',
                 autoRedirect: {
@@ -290,39 +345,87 @@ export class MainController extends BaseController {
     };
 
     /**
-     * Display book details with copies information
-     * GET /book/:id
+     * Borrow a book copy
+     * POST /api/books/:id/borrow
      */
-    getBookDetails = async (req: Request, res: Response): Promise<void> => {
+    borrowBook = async (req: Request, res: Response): Promise<void> => {
         try {
             const { id } = req.params;
-            const bookWithCopies = await this.bookService.getBookWithCopies(id);
+            const { borrowerName, borrowerEmail } = req.body;
 
-            if (!bookWithCopies) {
-                res.status(404).render('partials/error', {
-                    title: 'Book Not Found',
-                    description: `The book with ID "${id}" could not be found.`,
-                    backUrl: '/table',
-                    backText: 'Back to Books Table'
+            if (!borrowerName) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Borrower name is required'
                 });
                 return;
             }
 
-            res.render('books/details', {
-                book: bookWithCopies,
-                copies: bookWithCopies.copies,
-                totalCopies: bookWithCopies.totalCopies,
-                availableCopies: bookWithCopies.availableCopies,
-                borrowedCopies: bookWithCopies.borrowedCopies
+            const result = await this.bookService.borrowBook(id, {
+                borrowerName,
+                borrowerEmail: borrowerEmail || null
             });
+
+            if (result.success) {
+                res.json({
+                    success: true,
+                    message: 'Book borrowed successfully',
+                    copyId: result.copyId
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: result.message || 'Failed to borrow book'
+                });
+            }
         } catch (error) {
-            console.error('Error fetching book details:', error);
-            res.status(500).render('partials/error', {
-                title: 'Error',
-                description: 'Failed to fetch book details from database',
-                error: error,
-                backUrl: '/table',
-                backText: 'Back to Books Table'
+            console.error('Error borrowing book:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Internal server error'
+            });
+        }
+    };
+
+    /**
+     * Return a book copy
+     * POST /api/books/:id/return
+     */
+    returnBook = async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id } = req.params;
+            const { returnerName, returnNotes } = req.body;
+
+            if (!returnerName) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Returner name is required'
+                });
+                return;
+            }
+
+            const result = await this.bookService.returnBook(id, {
+                returnerName,
+                returnNotes: returnNotes || null
+            });
+
+            if (result.success) {
+                res.json({
+                    success: true,
+                    message: 'Book returned successfully',
+                    copyId: result.copyId
+                });
+            } else {
+                res.status(400).json({
+                    success: false,
+                    message: result.message || 'Failed to return book'
+                });
+            }
+        } catch (error) {
+            console.error('Error returning book:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Internal server error'
             });
         }
     };

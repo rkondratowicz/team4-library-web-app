@@ -1,5 +1,6 @@
 import { Book, UpdateBookInput, DatabaseInfo, SearchOptions, SearchResult } from '../models/Book.js';
 import { Copy, CreateCopyInput } from '../models/Copy.js';
+import { Member, CreateMemberInput, UpdateMemberInput } from '../models/Member.js';
 
 /**
  * Interface for Book Repository
@@ -81,6 +82,42 @@ export interface IBookRepository {
    * Update copy status
    */
   updateCopyStatus(copyId: string, status: 'Available' | 'Borrowed'): Promise<boolean>;
+}
+
+/**
+ * Interface for Member Repository
+ * This defines the contract for data access operations on members
+ */
+export interface MemberRepository {
+  /**
+   * Find all members in the database
+   */
+  findAll(): Promise<Member[]>;
+
+  /**
+   * Find a member by their ID
+   */
+  findById(id: number): Promise<Member | null>;
+
+  /**
+   * Find a member by their email
+   */
+  findByEmail(email: string): Promise<Member | null>;
+
+  /**
+   * Create a new member in the database
+   */
+  create(memberData: CreateMemberInput): Promise<Member>;
+
+  /**
+   * Update an existing member
+   */
+  update(id: number, updateData: UpdateMemberInput): Promise<Member | null>;
+
+  /**
+   * Delete a member from the database
+   */
+  delete(id: number): Promise<boolean>;
 }
 
 /**
