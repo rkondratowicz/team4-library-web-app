@@ -87,7 +87,6 @@
             <th>Total Copies</th>
             <th>Available</th>
             <th>Borrowed</th>
-            <th>Borrowed By</th>
             <th>Description</th>
             <th>Actions</th>
         </tr>
@@ -127,28 +126,6 @@
                     <span class="copy-count borrowed">
                         <%= book.borrowedCopies || 0 %>
                     </span>
-                </td>
-                <td class="borrowed-by-info">
-                    <% if (book.borrowingDetails && book.borrowingDetails.length> 0) { %>
-                        <div class="borrowers-list">
-                            <% book.borrowingDetails.forEach(borrowing=> { %>
-                                <div class="borrower-item">
-                                    <strong>
-                                        <%= borrowing.MemberName %>
-                                    </strong>
-                                    <br>
-                                    <small class="borrower-email">
-                                        <%= borrowing.MemberEmail %>
-                                    </small>
-                                    <br>
-                                    <small class="due-date">Due: <%= new Date(borrowing.DueDate).toLocaleDateString() %>
-                                            </small>
-                                </div>
-                                <% }); %>
-                        </div>
-                        <% } else { %>
-                            <span class="no-borrowers">-</span>
-                            <% } %>
                 </td>
                 <td title="<%= book.Description || '' %>">
                     <%= book.Description ? (book.Description.length> 50 ? book.Description.substring(0, 50) + '...' :
@@ -461,48 +438,6 @@
                 background-color: #f8d7da;
                 color: #721c24;
                 border: 1px solid #f5c6cb;
-            }
-
-            /* Borrowed By Information Styles */
-            .borrowed-by-info {
-                max-width: 200px;
-                padding: 8px;
-                font-size: 0.85em;
-            }
-
-            .borrowers-list {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .borrower-item {
-                background-color: #f8f9fa;
-                border: 1px solid #dee2e6;
-                border-radius: 6px;
-                padding: 6px 8px;
-                text-align: left;
-            }
-
-            .borrower-item strong {
-                color: #495057;
-                font-size: 0.9em;
-            }
-
-            .borrower-email {
-                color: #6c757d;
-                font-size: 0.8em;
-            }
-
-            .due-date {
-                color: #007bff;
-                font-size: 0.8em;
-                font-weight: 500;
-            }
-
-            .no-borrowers {
-                color: #adb5bd;
-                font-style: italic;
             }
 
             /* Action Buttons */

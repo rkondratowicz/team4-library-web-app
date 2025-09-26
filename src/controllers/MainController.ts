@@ -29,7 +29,7 @@ export class MainController extends BaseController {
             }
 
             const member = req.session.member;
-            
+
             // Route based on user role
             if (member.Role === 'admin') {
                 // Admin - show admin homepage (current main menu)
@@ -110,16 +110,14 @@ export class MainController extends BaseController {
                 books = await this.bookService.getAllBooks();
             }
 
-            // Get books with copy statistics and borrowing details
+            // Get books with copy statistics (borrowing details shown only in individual book details)
             const booksWithCopies = await Promise.all(books.map(async (book: any) => {
                 const copyStats = await this.bookService.getBookCopyStats(book.ID);
-                const borrowingDetails = await this.bookService.getBookBorrowingDetails(book.ID);
                 return {
                     ...book,
                     totalCopies: copyStats.totalCopies || 0,
                     availableCopies: copyStats.availableCopies || 0,
-                    borrowedCopies: copyStats.borrowedCopies || 0,
-                    borrowingDetails: borrowingDetails || []
+                    borrowedCopies: copyStats.borrowedCopies || 0
                 };
             }));
 
@@ -181,12 +179,16 @@ export class MainController extends BaseController {
                 return;
             }
 
+            // Get borrowing details for this specific book
+            const borrowingDetails = await this.bookService.getBookBorrowingDetails(id);
+
             res.render('books/details', {
                 book: bookWithCopies,
                 copies: bookWithCopies.copies,
                 totalCopies: bookWithCopies.totalCopies,
                 availableCopies: bookWithCopies.availableCopies,
-                borrowedCopies: bookWithCopies.borrowedCopies
+                borrowedCopies: bookWithCopies.borrowedCopies,
+                borrowingDetails: borrowingDetails || []
             });
         } catch (error) {
             console.error('Error fetching book details:', error);

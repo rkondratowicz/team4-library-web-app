@@ -2,8 +2,10 @@
 
 <div class="book-details-container">
     <div class="book-header">
-        <h1>📚 <%= book.Title %></h1>
-        <p class="book-id">Book ID: <%= book.ID %></p>
+        <h1>📚 <%= book.Title %>
+        </h1>
+        <p class="book-id">Book ID: <%= book.ID %>
+        </p>
     </div>
 
     <div class="book-info-section">
@@ -11,405 +13,576 @@
         <div class="info-grid">
             <div class="info-item">
                 <label>Author:</label>
-                <span><%= book.Author %></span>
+                <span>
+                    <%= book.Author %>
+                </span>
             </div>
             <div class="info-item">
                 <label>Title:</label>
-                <span><%= book.Title %></span>
+                <span>
+                    <%= book.Title %>
+                </span>
             </div>
             <% if (book.ISBN) { %>
-            <div class="info-item">
-                <label>ISBN:</label>
-                <span><%= book.ISBN %></span>
-            </div>
-            <% } %>
-            <% if (book.Genre) { %>
-            <div class="info-item">
-                <label>Genre:</label>
-                <span class="genre-tag"><%= book.Genre %></span>
-            </div>
-            <% } %>
-            <% if (book.PublicationYear) { %>
-            <div class="info-item">
-                <label>Publication Year:</label>
-                <span><%= book.PublicationYear %></span>
-            </div>
-            <% } %>
+                <div class="info-item">
+                    <label>ISBN:</label>
+                    <span>
+                        <%= book.ISBN %>
+                    </span>
+                </div>
+                <% } %>
+                    <% if (book.Genre) { %>
+                        <div class="info-item">
+                            <label>Genre:</label>
+                            <span class="genre-tag">
+                                <%= book.Genre %>
+                            </span>
+                        </div>
+                        <% } %>
+                            <% if (book.PublicationYear) { %>
+                                <div class="info-item">
+                                    <label>Publication Year:</label>
+                                    <span>
+                                        <%= book.PublicationYear %>
+                                    </span>
+                                </div>
+                                <% } %>
         </div>
-        
+
         <% if (book.Description) { %>
-        <div class="description-section">
-            <label>Description:</label>
-            <p class="description-text"><%= book.Description %></p>
-        </div>
-        <% } %>
+            <div class="description-section">
+                <label>Description:</label>
+                <p class="description-text">
+                    <%= book.Description %>
+                </p>
+            </div>
+            <% } %>
     </div>
 
     <div class="copies-section">
         <h2>📋 Copies Available</h2>
         <div class="copies-summary">
             <div class="summary-item available">
-                <span class="count"><%= availableCopies %></span>
+                <span class="count">
+                    <%= availableCopies %>
+                </span>
                 <span class="label">Available</span>
             </div>
             <div class="summary-item borrowed">
-                <span class="count"><%= borrowedCopies %></span>
+                <span class="count">
+                    <%= borrowedCopies %>
+                </span>
                 <span class="label">Borrowed</span>
             </div>
             <div class="summary-item total">
-                <span class="count"><%= totalCopies %></span>
+                <span class="count">
+                    <%= totalCopies %>
+                </span>
                 <span class="label">Total</span>
             </div>
         </div>
 
-        <% if (copies && copies.length > 0) { %>
-        <div class="copies-table-container">
-            <table class="copies-table">
-                <thead>
-                    <tr>
-                        <th>Copy ID</th>
-                        <th>Status</th>
-                        <th>Added Date</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% copies.forEach(function(copy) { %>
-                    <tr class="copy-row <%= copy.Status.toLowerCase() %>">
-                        <td class="copy-id"><%= copy.CopyID %></td>
-                        <td>
-                            <span class="status-badge <%= copy.Status.toLowerCase() %>">
-                                <%= copy.Status === 'Available' ? '✅ Available' : '📚 Borrowed' %>
-                            </span>
-                        </td>
-                        <td><%= new Date(copy.CreatedAt).toLocaleDateString() %></td>
-                        <td><%= new Date(copy.UpdatedAt).toLocaleDateString() %></td>
-                    </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        </div>
-        <% } else { %>
-        <div class="no-copies">
-            <p>📭 No copies available for this book.</p>
-        </div>
-        <% } %>
+        <% if (copies && copies.length> 0) { %>
+            <div class="copies-table-container">
+                <table class="copies-table">
+                    <thead>
+                        <tr>
+                            <th>Copy ID</th>
+                            <th>Status</th>
+                            <th>Added Date</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% copies.forEach(function(copy) { %>
+                            <tr class="copy-row <%= copy.Status.toLowerCase() %>">
+                                <td class="copy-id">
+                                    <%= copy.CopyID %>
+                                </td>
+                                <td>
+                                    <span class="status-badge <%= copy.Status.toLowerCase() %>">
+                                        <%= copy.Status==='Available' ? '✅ Available' : '📚 Borrowed' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= new Date(copy.CreatedAt).toLocaleDateString() %>
+                                </td>
+                                <td>
+                                    <%= new Date(copy.UpdatedAt).toLocaleDateString() %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+                <div class="no-copies">
+                    <p>📭 No copies available for this book.</p>
+                </div>
+                <% } %>
     </div>
 
-    <div class="actions-section">
-        <a href="/edit/<%= book.ID %>" class="action-btn edit">✏️ Edit Book</a>
-        <a href="#" class="action-btn add" onclick="addNewCopy('<%= book.ID %>')">📋 Add New Copy</a>
-    </div>
+    <!-- Current Borrowers Section -->
+    <% if (borrowingDetails && borrowingDetails.length> 0) { %>
+        <div class="borrowing-section">
+            <h2>👥 Current Borrowers</h2>
+            <div class="borrowers-grid">
+                <% borrowingDetails.forEach(function(borrowing) { %>
+                    <div class="borrower-card">
+                        <div class="borrower-header">
+                            <h3>
+                                <%= borrowing.MemberName %>
+                            </h3>
+                            <span class="copy-id">Copy: <%= borrowing.CopyID %></span>
+                        </div>
+                        <div class="borrower-details">
+                            <div class="detail-item">
+                                <span class="label">📧 Email:</span>
+                                <span class="value">
+                                    <%= borrowing.MemberEmail %>
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">📅 Borrowed:</span>
+                                <span class="value">
+                                    <%= new Date(borrowing.BorrowDate).toLocaleDateString() %>
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">⏰ Due:</span>
+                                <span class="value due-date">
+                                    <%= new Date(borrowing.DueDate).toLocaleDateString() %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+            </div>
+        </div>
+        <% } else { %>
+            <div class="no-borrowers-section">
+                <h2>👥 Current Borrowers</h2>
+                <div class="no-borrowers">
+                    <p>📖 No current borrowers for this book.</p>
+                </div>
+            </div>
+            <% } %>
+
+                <div class="actions-section">
+                    <a href="/edit/<%= book.ID %>" class="action-btn edit">✏️ Edit Book</a>
+                    <a href="#" class="action-btn add" onclick="addNewCopy('<%= book.ID %>')">📋 Add New Copy</a>
+                </div>
 </div>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background-color: #f5f5f5;
-    line-height: 1.6;
-}
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+        line-height: 1.6;
+    }
 
-.book-details-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    background-color: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-.back-link {
-    display: inline-block;
-    margin-bottom: 20px;
-    color: #007bff;
-    text-decoration: none;
-    padding: 8px 16px;
-    border: 1px solid #007bff;
-    border-radius: 4px;
-    transition: all 0.3s;
-}
-
-.back-link:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-.book-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #e9ecef;
-}
-
-.book-header h1 {
-    color: #2c3e50;
-    margin-bottom: 10px;
-    font-size: 2.5em;
-}
-
-.book-id {
-    color: #6c757d;
-    font-style: italic;
-    margin: 0;
-}
-
-.book-info-section, .copies-section {
-    margin-bottom: 40px;
-}
-
-.book-info-section h2, .copies-section h2 {
-    color: #495057;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.info-item {
-    display: flex;
-    padding: 12px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    border-left: 4px solid #007bff;
-}
-
-.info-item label {
-    font-weight: bold;
-    color: #495057;
-    min-width: 120px;
-    margin-right: 10px;
-}
-
-.info-item span {
-    color: #212529;
-}
-
-.genre-tag {
-    background-color: #e7f3ff;
-    color: #0056b3;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.9em;
-}
-
-.description-section {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #28a745;
-}
-
-.description-section label {
-    font-weight: bold;
-    color: #495057;
-    display: block;
-    margin-bottom: 10px;
-}
-
-.description-text {
-    color: #212529;
-    margin: 0;
-    white-space: pre-line;
-}
-
-.copies-summary {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-.summary-item {
-    flex: 1;
-    min-width: 120px;
-    text-align: center;
-    padding: 20px;
-    border-radius: 8px;
-    color: white;
-}
-
-.summary-item.available {
-    background-color: #28a745;
-}
-
-.summary-item.borrowed {
-    background-color: #dc3545;
-}
-
-.summary-item.total {
-    background-color: #6c757d;
-}
-
-.summary-item .count {
-    display: block;
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.summary-item .label {
-    font-size: 0.9em;
-    opacity: 0.9;
-}
-
-.copies-table-container {
-    overflow-x: auto;
-}
-
-.copies-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.copies-table th,
-.copies-table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.copies-table th {
-    background-color: #343a40;
-    color: white;
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.9em;
-    letter-spacing: 0.5px;
-}
-
-.copy-row:hover {
-    background-color: #f8f9fa;
-}
-
-.copy-id {
-    font-family: monospace;
-    font-weight: 600;
-    color: #495057;
-}
-
-.status-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-}
-
-.status-badge.available {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.status-badge.borrowed {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.no-copies {
-    text-align: center;
-    padding: 40px;
-    color: #6c757d;
-    font-style: italic;
-}
-
-.actions-section {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    padding-top: 30px;
-    border-top: 2px solid #e9ecef;
-    flex-wrap: wrap;
-}
-
-.action-btn {
-    display: inline-block;
-    padding: 12px 24px;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.3s;
-    min-width: 140px;
-}
-
-.action-btn.edit {
-    background-color: #007bff;
-    color: white;
-}
-
-.action-btn.edit:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
-}
-
-.action-btn.add {
-    background-color: #28a745;
-    color: white;
-}
-
-.action-btn.add:hover {
-    background-color: #1e7e34;
-    transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
     .book-details-container {
-        margin: 10px;
-        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+        padding: 8px 16px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+
+    .back-link:hover {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .book-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
     .book-header h1 {
-        font-size: 2em;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 2.5em;
     }
-    
+
+    .book-id {
+        color: #6c757d;
+        font-style: italic;
+        margin: 0;
+    }
+
+    .book-info-section,
+    .copies-section {
+        margin-bottom: 40px;
+    }
+
+    .book-info-section h2,
+    .copies-section h2 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
     .info-grid {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
     }
-    
+
+    .info-item {
+        display: flex;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        border-left: 4px solid #007bff;
+    }
+
+    .info-item label {
+        font-weight: bold;
+        color: #495057;
+        min-width: 120px;
+        margin-right: 10px;
+    }
+
+    .info-item span {
+        color: #212529;
+    }
+
+    .genre-tag {
+        background-color: #e7f3ff;
+        color: #0056b3;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.9em;
+    }
+
+    .description-section {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+    }
+
+    .description-section label {
+        font-weight: bold;
+        color: #495057;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .description-text {
+        color: #212529;
+        margin: 0;
+        white-space: pre-line;
+    }
+
     .copies-summary {
-        flex-direction: column;
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
     }
-    
+
+    .summary-item {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .summary-item.available {
+        background-color: #28a745;
+    }
+
+    .summary-item.borrowed {
+        background-color: #dc3545;
+    }
+
+    .summary-item.total {
+        background-color: #6c757d;
+    }
+
+    .summary-item .count {
+        display: block;
+        font-size: 2em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .summary-item .label {
+        font-size: 0.9em;
+        opacity: 0.9;
+    }
+
+    .copies-table-container {
+        overflow-x: auto;
+    }
+
+    .copies-table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .copies-table th,
+    .copies-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .copies-table th {
+        background-color: #343a40;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9em;
+        letter-spacing: 0.5px;
+    }
+
+    .copy-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .copy-id {
+        font-family: monospace;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .status-badge.available {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.borrowed {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .no-copies {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+        font-style: italic;
+    }
+
     .actions-section {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        padding-top: 30px;
+        border-top: 2px solid #e9ecef;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s;
+        min-width: 140px;
+    }
+
+    .action-btn.edit {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .action-btn.edit:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+    }
+
+    .action-btn.add {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .action-btn.add:hover {
+        background-color: #1e7e34;
+        transform: translateY(-1px);
+    }
+
+    /* Borrowing Section Styles */
+    .borrowing-section,
+    .no-borrowers-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
+    }
+
+    .borrowing-section h2,
+    .no-borrowers-section h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+
+    .borrowers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .borrower-card {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .borrower-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .borrower-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .borrower-header h3 {
+        color: #495057;
+        margin: 0;
+        font-size: 1.1em;
+        font-weight: 600;
+    }
+
+    .copy-id {
+        background: #007bff;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+
+    .borrower-details {
+        display: flex;
         flex-direction: column;
+        gap: 8px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
     }
-}
+
+    .detail-item .label {
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 0.9em;
+    }
+
+    .detail-item .value {
+        color: #495057;
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .due-date {
+        color: #dc3545 !important;
+        font-weight: 600 !important;
+    }
+
+    .no-borrowers {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .book-details-container {
+            margin: 10px;
+            padding: 20px;
+        }
+
+        .book-header h1 {
+            font-size: 2em;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .copies-summary {
+            flex-direction: column;
+        }
+
+        .actions-section {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
 </style>
 
 <script>
-async function addNewCopy(bookId) {
-    try {
-        const response = await fetch(`/api/books/${bookId}/copies`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+    async function addNewCopy(bookId) {
+        try {
+            const response = await fetch(`/api/books/${bookId}/copies`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                alert(`✅ Copy created successfully!\nCopy ID: ${result.data.copyId}`);
+                // Reload the page to show the new copy
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert(`❌ Failed to create copy: ${error.message || 'Unknown error'}`);
             }
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            alert(`✅ Copy created successfully!\nCopy ID: ${result.data.copyId}`);
-            // Reload the page to show the new copy
-            window.location.reload();
-        } else {
-            const error = await response.json();
-            alert(`❌ Failed to create copy: ${error.message || 'Unknown error'}`);
+        } catch (error) {
+            console.error('Error creating copy:', error);
+            alert('❌ Failed to create copy. Please check your network connection and try again.');
         }
-    } catch (error) {
-        console.error('Error creating copy:', error);
-        alert('❌ Failed to create copy. Please check your network connection and try again.');
     }
-}
 </script>
