@@ -405,6 +405,177 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Get member's active borrowings count
+   * @param memberId Member ID
+   * @returns Promise<number> Number of active borrowings
+   */
+  async getMemberActiveBorrowingsCount(memberId: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT COUNT(*) as count FROM borrowings WHERE MemberID = ? AND Status = "Active"',
+        [memberId],
+        (err, row: any) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(row?.count || 0);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Get member's active borrowings with book details
+   * @param memberId Member ID
+   * @returns Promise<any[]> Array of active borrowings with book info
+   */
+  async getMemberActiveBorrowings(memberId: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          b.BorrowingID,
+          b.CopyID,
+          b.BorrowDate,
+          b.DueDate,
+          b.Status,
+          c.BookID,
+          bk.Title,
+          bk.Author,
+          bk.Genre,
+          julianday(b.DueDate) - julianday('now') as DaysRemaining,
+          CASE 
+            WHEN julianday('now') > julianday(b.DueDate) THEN 1 
+            ELSE 0 
+          END as IsOverdue
+        FROM borrowings b
+        JOIN copies c ON b.CopyID = c.CopyID
+        JOIN books bk ON c.BookID = bk.ID
+        WHERE b.MemberID = ? AND b.Status = 'Active'
+        ORDER BY b.BorrowDate DESC
+      `;
+
+      this.db.all(query, [memberId], (err, rows) => {
+        if (err) {
+          reject(new Error(`Database query failed: ${err.message}`));
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
+   * Create a new borrowing record
+   * @param memberId Member ID
+   * @param copyId Copy ID
+   * @returns Promise<string> The borrowing ID
+   */
+  async createBorrowing(memberId: string, copyId: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const borrowingId = `BORROW-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+      const borrowDate = new Date().toISOString();
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 14); // 2 weeks borrowing period
+      const dueDateString = dueDate.toISOString();
+
+      this.db.run(
+        `INSERT INTO borrowings (BorrowingID, MemberID, CopyID, BorrowDate, DueDate, Status) 
+         VALUES (?, ?, ?, ?, ?, 'Active')`,
+        [borrowingId, memberId, copyId, borrowDate, dueDateString],
+        function (err) {
+          if (err) {
+            reject(new Error(`Failed to create borrowing record: ${err.message}`));
+          } else {
+            resolve(borrowingId);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Return a book (update borrowing record and copy status)
+   * @param borrowingId Borrowing ID
+   * @returns Promise<boolean> True if successful
+   */
+  async returnBook(borrowingId: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const returnDate = new Date().toISOString();
+
+      // First update the borrowing record
+      this.db.run(
+        `UPDATE borrowings 
+         SET Status = 'Returned', ReturnDate = ?, UpdatedAt = CURRENT_TIMESTAMP 
+         WHERE BorrowingID = ? AND Status = 'Active'`,
+        [returnDate, borrowingId],
+        (err) => {
+          if (err) {
+            reject(new Error(`Failed to update borrowing record: ${err.message}`));
+          } else {
+            // Then update the copy status to Available
+            this.db.run(
+              `UPDATE copies 
+               SET Status = 'Available' 
+               WHERE CopyID = (SELECT CopyID FROM borrowings WHERE BorrowingID = ?)`,
+              [borrowingId],
+              function (err) {
+                if (err) {
+                  reject(new Error(`Failed to update copy status: ${err.message}`));
+                } else {
+                  resolve(this.changes > 0);
+                }
+              }
+            );
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Check if a book is available for borrowing (has available copies)
+   * @param bookId Book ID
+   * @returns Promise<boolean> True if available
+   */
+  async isBookAvailable(bookId: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT COUNT(*) as count FROM copies WHERE BookID = ? AND Status = "Available"',
+        [bookId],
+        (err, row: any) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve((row?.count || 0) > 0);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Get available copies count for a book
+   * @param bookId Book ID
+   * @returns Promise<number> Number of available copies
+   */
+  async getAvailableCopiesCount(bookId: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT COUNT(*) as count FROM copies WHERE BookID = ? AND Status = "Available"',
+        [bookId],
+        (err, row: any) => {
+          if (err) {
+            reject(new Error(`Database query failed: ${err.message}`));
+          } else {
+            resolve(row?.count || 0);
+          }
+        }
+      );
+    });
+  }
+
+  /**
    * Map sort criteria to database column names
    * @private
    */

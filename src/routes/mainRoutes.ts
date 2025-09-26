@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { MainController } from '../controllers/MainController.js';
+import { optionalAuth } from '../middleware/auth.js';
 import express from 'express';
 
 /**
@@ -14,7 +15,7 @@ export function createMainRoutes(mainController: MainController): Router {
   router.use(express.json());
 
   // GET / - Main menu page
-  router.get('/', mainController.getMainMenu);
+  router.get('/', optionalAuth, mainController.getMainMenu);
 
   // GET /table - Books table view
   router.get('/table', mainController.getBooksTable);

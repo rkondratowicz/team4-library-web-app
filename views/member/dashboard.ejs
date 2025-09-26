@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .member-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #e0e0e0;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .welcome-text {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .member-nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .nav-link.logout {
+            background: #e74c3c;
+        }
+
+        .nav-link.logout:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h2 {
+            color: white;
+            font-size: 2.2em;
+            margin: 0 0 10px 0;
+        }
+
+        .dashboard-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .stat-sublabel {
+            color: #95a5a6;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .actions-header h3 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin: 0 0 10px 0;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 30px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-card.books {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+        }
+
+        .action-card.borrowed {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+        }
+
+        .action-card.profile {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .action-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .action-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+        }
+
+        .action-card p {
+            margin: 0;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .alert-success {
+            background-color: rgba(212, 237, 218, 0.9);
+            color: #155724;
+            border: 1px solid rgba(195, 230, 203, 0.9);
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 40px;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .member-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="member-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <span style="font-size: 2em;">📚</span>
+                <h1>Library Portal</h1>
+            </div>
+            <div class="member-info">
+                <span class="welcome-text">Welcome, <%= member.Name %>!</span>
+                <div class="member-nav">
+                    <a href="/member/books" class="nav-link">Browse Books</a>
+                    <a href="/member/borrowed" class="nav-link">My Books</a>
+                    <a href="/profile" class="nav-link">Profile</a>
+                    <a href="/logout" class="nav-link logout">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>📖 My Library Dashboard</h2>
+            <p>Manage your books and explore the library catalog</p>
+        </div>
+
+        <% if (message) { %>
+            <div class="alert alert-success">
+                <%= message %>
+            </div>
+            <% } %>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= borrowedBooksCount %>
+                        </div>
+                        <div class="stat-label">Currently Borrowed</div>
+                        <div class="stat-sublabel">of <%= borrowingLimit %> allowed</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= availableBooksCount %>
+                        </div>
+                        <div class="stat-label">Books Available</div>
+                        <div class="stat-sublabel">in our collection</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            <%= borrowingLimit - borrowedBooksCount %>
+                        </div>
+                        <div class="stat-label">Books You Can Borrow</div>
+                        <div class="stat-sublabel">remaining slots</div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="actions-header">
+                        <h3>🚀 Quick Actions</h3>
+                        <p>What would you like to do today?</p>
+                    </div>
+
+                    <div class="actions-grid">
+                        <a href="/member/books" class="action-card books">
+                            <span class="action-icon">📚</span>
+                            <h4>Browse Books</h4>
+                            <p>Explore our complete collection and find your next great read</p>
+                        </a>
+
+                        <a href="/member/borrowed" class="action-card borrowed">
+                            <span class="action-icon">📖</span>
+                            <h4>My Borrowed Books</h4>
+                            <p>View your current books, due dates, and return options</p>
+                        </a>
+
+                        <a href="/profile" class="action-card profile">
+                            <span class="action-icon">👤</span>
+                            <h4>My Profile</h4>
+                            <p>Update your account information and preferences</p>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <p>Library Member Portal • Enjoy your reading journey! 📚</p>
+                </div>
+    </div>
+</body>
+
+</html>
