@@ -781,6 +781,23 @@ export class BookService {
   }
 
   /**
+   * Get borrowing details for a book (for admin view)
+   * @param bookId Book ID
+   * @returns Promise<any[]> Array of active borrowings with member details
+   */
+  async getBookBorrowingDetails(bookId: string): Promise<any[]> {
+    if (!bookId || typeof bookId !== 'string') {
+      throw new Error('Book ID must be a valid string');
+    }
+
+    try {
+      return await this.bookRepository.getBookBorrowingDetails(bookId);
+    } catch (error) {
+      throw new Error(`Failed to get book borrowing details: ${error}`);
+    }
+  }
+
+  /**
    * Validate search options
    * @private
    */

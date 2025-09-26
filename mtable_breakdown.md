@@ -170,28 +170,35 @@ CREATE TABLE members (
 ---
 
 ### **Step 7: Update Book Borrowing with Member Integration**
-**Status:** Not Started  
+**Status:** ✅ Completed  
 **Priority:** High  
 **Dependencies:** Steps 1, 2
 
 #### Tasks:
-- [ ] Modify copies table to include MemberID
-- [ ] Update existing borrowing system for member tracking
-- [ ] Enforce member borrowing rules
-- [ ] Update book statistics to show member info
+- [x] ~~Modify copies table to include MemberID~~ (Not needed - using proper borrowings table)
+- [x] Update existing borrowing system for member tracking (Already implemented)
+- [x] Enforce member borrowing rules (Already implemented in previous steps)
+- [x] Update book statistics to show member info
 
-#### Database Changes:
-```sql
-ALTER TABLE copies ADD COLUMN MemberID TEXT;
-ALTER TABLE copies ADD COLUMN BorrowedDate DATETIME;
-ALTER TABLE copies ADD COLUMN DueDate DATETIME;
-```
+#### Implementation Details:
+Instead of modifying the copies table, this step utilized the existing `borrowings` table which provides a better design for tracking member borrowing relationships. The implementation includes:
 
-#### Files to Modify:
-- `migrations/05-add-member-to-copies.sql` - Add member fields to copies
-- Update `src/repositories/SQLiteBookRepository.ts` - Member borrowing queries
-- Update `src/services/BookService.ts` - Member borrowing rules
-- Update `views/books/table.ejs` - Show member info in admin view
+- **Member Borrowing Queries**: Added `getBookBorrowingDetails()` method to repository layer
+- **Service Layer Integration**: Added service method to expose borrowing details to controllers
+- **Admin View Enhancement**: Updated admin book table to display member information for borrowed books
+- **UI Improvements**: Added "Borrowed By" column showing member names, emails, and due dates
+
+#### Files Modified:
+- Updated `src/repositories/SQLiteBookRepository.ts` - Added `getBookBorrowingDetails()` method
+- Updated `src/services/BookService.ts` - Added service method for borrowing details
+- Updated `src/controllers/MainController.ts` - Enhanced book data with borrowing details
+- Updated `views/books/table.ejs` - Added "Borrowed By" column with member information and styling
+
+#### Database Architecture:
+The system maintains a clean separation using the existing `borrowings` table which provides:
+- Proper foreign key relationships between members, copies, and books
+- Comprehensive borrowing history tracking
+- Better data integrity than modifying the copies table directly
 
 ---
 
