@@ -619,6 +619,39 @@ export class SQLiteBookRepository implements IBookRepository {
   }
 
   /**
+   * Get borrowing details for a book with member information
+   * @param bookId Book ID
+   * @returns Promise<any[]> Array of active borrowings with member details
+   */
+  async getBookBorrowingDetails(bookId: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          b.BorrowingID,
+          b.BorrowDate,
+          b.DueDate,
+          b.Status,
+          m.Name as MemberName,
+          m.Email as MemberEmail,
+          c.CopyID
+        FROM borrowings b
+        JOIN members m ON b.MemberID = m.MemberID  
+        JOIN copies c ON b.CopyID = c.CopyID
+        WHERE c.BookID = ? AND b.Status = 'Active'
+        ORDER BY b.BorrowDate DESC
+      `;
+
+      this.db.all(query, [bookId], (err: any, rows: any) => {
+        if (err) {
+          reject(new Error(`Database query failed: ${err.message}`));
+        } else {
+          resolve(rows || []);
+        }
+      });
+    });
+  }
+
+  /**
    * Map sort criteria to database column names
    * @private
    */

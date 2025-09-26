@@ -86,14 +86,16 @@ export class MainController extends BaseController {
                 books = await this.bookService.getAllBooks();
             }
 
-            // Get books with copy statistics
+            // Get books with copy statistics and borrowing details
             const booksWithCopies = await Promise.all(books.map(async (book: any) => {
                 const copyStats = await this.bookService.getBookCopyStats(book.ID);
+                const borrowingDetails = await this.bookService.getBookBorrowingDetails(book.ID);
                 return {
                     ...book,
                     totalCopies: copyStats.totalCopies || 0,
                     availableCopies: copyStats.availableCopies || 0,
-                    borrowedCopies: copyStats.borrowedCopies || 0
+                    borrowedCopies: copyStats.borrowedCopies || 0,
+                    borrowingDetails: borrowingDetails || []
                 };
             }));
 
