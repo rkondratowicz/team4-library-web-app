@@ -14,8 +14,8 @@ export function createMainRoutes(mainController: MainController): Router {
   router.use(express.urlencoded({ extended: true }));
   router.use(express.json());
 
-  // GET / - Main menu page
-  router.get('/', optionalAuth, mainController.getMainMenu);
+  // GET / - Main menu page with authentication flow
+  router.get('/', mainController.getMainMenu);
 
   // GET /table - Books table view
   router.get('/table', mainController.getBooksTable);
