@@ -18,6 +18,9 @@ export class SQLiteDatabaseRepository implements IDatabaseRepository {
   constructor(dbPath: string = './library.db') {
     this.dbPath = dbPath;
     this.db = new sqlite3.Database(dbPath);
+    
+    // Enable foreign key constraints
+    this.db.run('PRAGMA foreign_keys = ON');
   }
 
   /**

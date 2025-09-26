@@ -288,25 +288,43 @@ export class MemberController extends BaseController {
                 return;
             }
 
+            console.log('Attempting to delete member with ID:', memberId);
+            console.log('Request headers:', {
+                'content-type': req.headers['content-type'],
+                'accept': req.headers['accept'],
+                'x-requested-with': req.headers['x-requested-with']
+            });
+            
             const success = await this.memberService.deleteMember(memberId);
+            console.log('Delete operation result:', success);
 
+            // Always return JSON for this endpoint since it's designed for AJAX calls
             if (success) {
+                console.log('Sending success response for member deletion');
                 res.json({
                     success: true,
                     message: 'Member deleted successfully'
                 });
             } else {
+                console.log('Member not found');
                 res.status(404).json({
                     success: false,
                     message: 'Member not found'
                 });
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deleting member:', error);
+            console.error('Error type:', typeof error);
+            console.error('Error message:', error?.message);
+            console.error('Stack trace:', error?.stack);
+            
+            const errorMessage = error?.message || 'Failed to delete member';
+            
+            // Always return JSON for this endpoint
             res.status(500).json({
                 success: false,
-                message: 'Failed to delete member'
+                message: errorMessage
             });
         }
     };
@@ -345,7 +363,9 @@ export class MemberController extends BaseController {
             res.render('members/details', {
                 title: `Member Details - ${memberDetails.Name}`,
                 memberDetails,
-                member: req.session?.member || null
+                member: req.session?.member || null,
+                message: req.query.message || null,
+                error: req.query.error || null
             });
 
         } catch (error) {

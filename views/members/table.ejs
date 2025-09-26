@@ -319,6 +319,107 @@
                 padding: 10px 8px;
             }
         }
+
+        /* Delete Confirmation Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body p {
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .warning-text {
+            color: #dc3545;
+            font-weight: 600;
+            margin-bottom: 15px !important;
+        }
+
+        .warning-list {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            color: #856404;
+        }
+
+        .warning-list li {
+            margin-bottom: 8px;
+        }
+
+        .modal-footer {
+            padding: 20px 30px 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .modal-footer .btn {
+            min-width: 120px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
     </style>
 </head>
 
@@ -465,7 +566,7 @@
                                         </td>
                                         <td>
                                             <div class="actions">
-                                                <a href="/members/view/<%= memberItem.MemberID %>"
+                                                <a href="/members/details/<%= memberItem.MemberID %>"
                                                     class="btn btn-primary btn-sm" title="View Details">👁️</a>
                                                 <a href="/members/edit/<%= memberItem.MemberID %>"
                                                     class="btn btn-secondary btn-sm" title="Edit Member">✏️</a>
@@ -514,30 +615,149 @@
         });
 
         async function deleteMember(memberId, memberName) {
-            if (!confirm(`Are you sure you want to delete member "${memberName}"?\n\nThis action cannot be undone.`)) {
-                return;
+            showDeleteConfirmationModal(memberId, memberName);
+        }
+
+        function showDeleteConfirmationModal(memberId, memberName) {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="deleteModal" class="modal-overlay">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>⚠️ Confirm Deletion</h3>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete member <strong>"${memberName}"</strong>?</p>
+                            <p class="warning-text">⚠️ This action cannot be undone and will permanently remove:</p>
+                            <ul class="warning-list">
+                                <li>Member's account and profile</li>
+                                <li>All borrowing history</li>
+                                <li>Access to the library system</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-danger" onclick="confirmDelete(${memberId})">
+                                🗑️ Delete Member
+                            </button>
+                            <button class="btn btn-secondary" onclick="closeDeleteModal()">
+                                ❌ Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Show modal
+            const modal = document.getElementById('deleteModal');
+            modal.style.display = 'flex';
+            
+            // Close modal when clicking outside of it
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeDeleteModal();
+                }
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal) {
+                    closeDeleteModal();
+                }
+            });
+        }
+
+        function closeDeleteModal() {
+            const modal = document.getElementById('deleteModal');
+            if (modal) {
+                // Remove the modal with a fade-out animation
+                modal.style.animation = 'fadeOut 0.2s ease-out';
+                setTimeout(() => {
+                    if (modal && modal.parentNode) {
+                        modal.remove();
+                    }
+                }, 200);
             }
+        }
+
+        async function confirmDelete(memberId) {
+            const modal = document.getElementById('deleteModal');
+            const deleteBtn = modal.querySelector('.btn-danger');
+            
+            // Show loading state
+            deleteBtn.innerHTML = '⏳ Deleting...';
+            deleteBtn.disabled = true;
 
             try {
                 const response = await fetch(`/members/delete/${memberId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // If we get HTML, it means there was a server error or redirect
+                    const text = await response.text();
+                    throw new Error('Server returned HTML instead of JSON. There may be a server error.');
+                }
+
                 const result = await response.json();
 
-                if (result.success) {
-                    alert('Member deleted successfully');
-                    window.location.reload();
+                if (response.ok && result.success) {
+                    closeDeleteModal();
+                    showSuccessMessage('Member deleted successfully');
+                    // Remove the row from table instead of full reload
+                    const row = document.querySelector(`button[data-member-id="${memberId}"]`).closest('tr');
+                    if (row) {
+                        row.remove();
+                    }
                 } else {
-                    alert('Error: ' + result.message);
+                    closeDeleteModal();
+                    showErrorMessage('Error: ' + (result.message || 'Unknown error occurred'));
                 }
             } catch (error) {
                 console.error('Error deleting member:', error);
-                alert('Failed to delete member. Please try again.');
+                closeDeleteModal();
+                showErrorMessage('Failed to delete member. Please try again. Error: ' + error.message);
             }
+        }
+
+        function showSuccessMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success';
+            alertDiv.innerHTML = message;
+            document.querySelector('.table-container').prepend(alertDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        function showErrorMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.innerHTML = message;
+            alertDiv.style.backgroundColor = '#f8d7da';
+            alertDiv.style.color = '#721c24';
+            alertDiv.style.borderColor = '#f5c6cb';
+            document.querySelector('.table-container').prepend(alertDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
         }
 
         // Show success/error messages from URL parameters

@@ -169,9 +169,28 @@ export class MemberService {
      */
     async deleteMember(memberId: number): Promise<boolean> {
         try {
-            return await this.memberRepository.delete(memberId);
-        } catch (error) {
-            console.error('Error deleting member:', error);
+            console.log('MemberService: Starting delete for member ID:', memberId);
+            
+            // First check if member exists
+            const member = await this.memberRepository.findById(memberId);
+            if (!member) {
+                console.log('MemberService: Member not found with ID:', memberId);
+                return false;
+            }
+
+            console.log('MemberService: Member found, proceeding with deletion');
+            const result = await this.memberRepository.delete(memberId);
+            console.log('MemberService: Repository delete result:', result);
+            
+            return result;
+        } catch (error: any) {
+            console.error('MemberService: Error deleting member:', error);
+            
+            // Re-throw with more specific error message if it's a foreign key constraint
+            if (error.message && error.message.includes('active borrowings')) {
+                throw error; // Keep the specific message
+            }
+            
             throw new Error('Failed to delete member');
         }
     }
