@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { BaseController } from './BaseController.js';
 import { CreateMemberInput, LoginCredentials } from '../models/Member.js';
+import { EmailService } from '../services/EmailService.js';
 
 /**
  * AuthController handles authentication-related routes
@@ -9,10 +10,12 @@ import { CreateMemberInput, LoginCredentials } from '../models/Member.js';
  */
 export class AuthController extends BaseController {
     private memberService: any; // Will be injected
+    private emailService: EmailService;
 
     constructor(memberService: any) {
         super();
         this.memberService = memberService;
+        this.emailService = new EmailService();
     }
 
     /**
@@ -128,18 +131,65 @@ export class AuthController extends BaseController {
                 return;
             }
 
+            // Validate name (at least 2 characters, letters and spaces only)
+            const nameRegex = /^[a-zA-Z\s]{2,}$/;
+            if (!nameRegex.test(name.trim())) {
+                res.redirect('/register?error=Name must be at least 2 characters long and contain only letters and spaces');
+                return;
+            }
+
+            // Enhanced email validation
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const trimmedEmail = email.toLowerCase().trim();
+
+            if (!emailRegex.test(trimmedEmail)) {
+                res.redirect('/register?error=Please enter a valid email address');
+                return;
+            }
+
+            // Skip domain validation for development/testing
+            // In production, you might want to add domain-specific validation
+
             if (password !== confirmPassword) {
                 res.redirect('/register?error=Passwords do not match');
                 return;
             }
 
-            if (password.length < 6) {
-                res.redirect('/register?error=Password must be at least 6 characters long');
+            // Enhanced password validation
+            if (password.length < 8) {
+                res.redirect('/register?error=Password must be at least 8 characters long');
+                return;
+            }
+
+            const passwordRequirements = {
+                hasUppercase: /[A-Z]/.test(password),
+                hasLowercase: /[a-z]/.test(password),
+                hasNumber: /[0-9]/.test(password),
+                hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+            };
+
+            if (!passwordRequirements.hasUppercase) {
+                res.redirect('/register?error=Password must contain at least one uppercase letter');
+                return;
+            }
+
+            if (!passwordRequirements.hasLowercase) {
+                res.redirect('/register?error=Password must contain at least one lowercase letter');
+                return;
+            }
+
+            if (!passwordRequirements.hasNumber) {
+                res.redirect('/register?error=Password must contain at least one number');
+                return;
+            }
+
+            if (!passwordRequirements.hasSpecial) {
+                res.redirect('/register?error=Password must contain at least one special character');
                 return;
             }
 
             // Check if email already exists
-            const existingMember = await this.memberService.getMemberByEmail(email);
+            const existingMember = await this.memberService.getMemberByEmail(trimmedEmail);
             if (existingMember) {
                 res.redirect('/register?error=Email already registered');
                 return;
@@ -148,12 +198,25 @@ export class AuthController extends BaseController {
             // Create new member
             const memberData: CreateMemberInput = {
                 Name: name.trim(),
-                Email: email.toLowerCase().trim(),
+                Email: trimmedEmail,
                 Password: password,
                 Role: 'member' // Default role
             };
 
             const newMember = await this.memberService.createMember(memberData);
+
+            // Send welcome email (optional - won't fail registration if email fails)
+            try {
+                await this.emailService.sendWelcomeEmail({
+                    memberName: newMember.Name,
+                    memberEmail: newMember.Email,
+                    memberRole: newMember.Role,
+                    registrationDate: new Date()
+                });
+            } catch (emailError) {
+                console.warn('Welcome email failed to send:', emailError);
+                // Continue with registration process even if email fails
+            }
 
             // Auto-login after registration
             req.session.member = {
@@ -169,6 +232,12 @@ export class AuthController extends BaseController {
 
         } catch (error) {
             console.error('Error during registration:', error);
+            console.error('Registration error details:', {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : 'No stack trace',
+                requestBody: req.body
+            });
+
             let errorMessage = 'Registration failed. Please try again.';
 
             if (error instanceof Error) {
